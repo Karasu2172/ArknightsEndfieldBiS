@@ -28,7 +28,6 @@ async function init() {
 
         db = new SQL.Database(new Uint8Array(buf));
         loadTags();
-        //document.getElementById('result').innerText = "連線成功！";
         
     } catch (err) {
         console.error("初始化出錯:", err);
@@ -49,7 +48,7 @@ function loadTags() {
             const select = document.getElementById(`tag${i}`);
             if (!select) continue;
 
-            select.innerHTML = '<option value="">-- 請選擇屬性 --</option>';
+            select.innerHTML = '<option value="">-- 全部 --</option>';
             
             const filtered = allTags.filter(tag => tag[0] === i);
             filtered.forEach(tag => {
@@ -84,32 +83,49 @@ function search() {
 
         if (res.length > 0) {
             const rows = res[0].values;
-            display.innerText = `找到 ${rows.length} 筆資料`;
+            display.innerText = `DATABASE QUERY: FOUND ${rows.length} MATCHES`;
 
             rows.forEach(row => {
                 const name = row[0];
                 const tr = document.createElement('tr');
+                
+                // 這裡套用了 Tailwind 樣式，讓每一列更具現代感
+                tr.className = "group hover:bg-yellow-500/5 transition-all duration-200 border-b border-zinc-800/50";
 
                 const imgPath = `./images/${name}.png`;
 
                 tr.innerHTML = `
-                    <td align="center">
-                        <img src="${imgPath}" alt="${name}" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.src='./images/default.png';">
+                    <td class="p-4 flex justify-center">
+                        <div class="relative w-14 h-14 bg-zinc-800 rounded border border-zinc-700 overflow-hidden group-hover:border-yellow-500/50 transition-colors">
+                            <img src="${imgPath}" alt="${name}" 
+                                 class="w-full h-full object-contain p-1 relative z-10" 
+                                 onerror="this.src='./images/default.png';">
+                            <div class="absolute top-0 right-0 w-2 h-2 bg-zinc-700 rotate-45 translate-x-1 -translate-y-1"></div>
+                        </div>
                     </td>
-                    <td>${name}</td>
-                    <td>${row[1]}</td>
-                    <td>${row[2]}</td>
-                    <td>${row[3]}</td>
+                    <td class="p-4">
+                        <div class="text-white font-bold tracking-tight">${name}</div>
+                        <div class="text-[10px] text-zinc-600 uppercase mt-1">Equipment Unit</div>
+                    </td>
+                    <td class="p-4 text-sm font-medium text-zinc-400">
+                        <span class="px-2 py-1 bg-zinc-800/50 rounded border border-zinc-700 group-hover:border-yellow-500/30">${row[1]}</span>
+                    </td>
+                    <td class="p-4 text-sm font-medium text-zinc-400">
+                        <span class="px-2 py-1 bg-zinc-800/50 rounded border border-zinc-700 group-hover:border-yellow-500/30">${row[2]}</span>
+                    </td>
+                    <td class="p-4 text-sm font-medium text-yellow-600 group-hover:text-yellow-500">
+                        ${row[3]}
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         } else {
-            display.innerText = "無相符資料";
-            tbody.innerHTML = '<tr><td colspan="4" align="center" style="color: gray;">查無結果</td></tr>';
+            display.innerText = "NO MATCHING DATA";
+            tbody.innerHTML = '<tr><td colspan="5" class="p-20 text-center text-zinc-700 uppercase tracking-widest text-xs">Access Denied: No Results Found</td></tr>';
         }
     } catch (err) {
         console.error("搜尋過程出錯:", err);
-        display.innerText = "搜尋發生錯誤。";
+        display.innerText = "ERROR IN DATA RETRIEVAL";
     }
 }
 
