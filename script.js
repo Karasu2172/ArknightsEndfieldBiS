@@ -4,19 +4,25 @@ async function init() {
     try {
         const config = { locateFile: file => `https://sql.js.org/dist/${file}` };
         const SQL = await initSqlJs(config);
+        
         const response = await fetch('./data.db');
         const buf = await response.arrayBuffer();
         db = new SQL.Database(new Uint8Array(buf));
+        
         loadTags();
-    } catch (err) { console.error(err); }
+        console.log("Terminal Sync Complete.");
+    } catch (err) {
+        console.error("Initialization Failed:", err);
+    }
 }
 
 function loadTags() {
     const res = db.exec("SELECT category, tag_name FROM tags");
     const allTags = res[0].values;
+
     for (let i = 1; i <= 3; i++) {
         const select = document.getElementById(`tag${i}`);
-        select.innerHTML = '<option value="">-- SELECT --</option>';
+        select.innerHTML = '<option value="">ALL_UNITS</option>';
         allTags.filter(t => t[0] === i).forEach(t => {
             select.innerHTML += `<option value="${t[1]}">${t[1]}</option>`;
         });
@@ -36,44 +42,43 @@ function search() {
     container.innerHTML = "";
     if (res.length > 0) {
         const rows = res[0].values;
-        document.getElementById('result-count').innerText = `// DATA_LOG: ${rows.length} UNITS SYNCED`;
+        document.getElementById('result-count').innerText = `// DATABASE_ENTRY: ${rows.length} MATCHES FOUND`;
 
-        rows.forEach((row) => {
+        rows.forEach((row, index) => {
             const card = document.createElement('div');
-            // 官網卡片風格：純白背景、細邊框、懸停黃色底影
-            card.className = "bg-white border border-zinc-200 p-6 group hover:border-black transition-all duration-300 relative overflow-hidden flex flex-col";
-            
+            card.className = "bg-white border border-zinc-200 p-0 hover:border-black transition-all duration-500 group relative flex flex-col";
+            card.style.animation = `cardFadeIn 0.5s ease forwards ${index * 0.05}s`;
+            card.style.opacity = 0;
+
             card.innerHTML = `
-                <div class="w-full aspect-square bg-[#F9F9F9] flex items-center justify-center mb-8 relative group-hover:bg-white transition-colors">
-                    <img src="./images/${row[0]}.png" class="w-3/4 h-3/4 object-contain transition-transform duration-700 group-hover:scale-105" onerror="this.src='./images/default.png'; this.style.opacity=0.1">
-                    <div class="absolute top-0 left-0 w-full h-full border-2 border-transparent group-hover:border-yellow-500/10 pointer-events-none"></div>
+                <div class="bg-[#F8F8F8] aspect-square flex items-center justify-center p-8 relative overflow-hidden">
+                    <img src="./images/${row[0]}.png" class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" onerror="this.src='./images/default.png'; this.style.opacity=0.2">
+                    <div class="absolute top-2 left-2 text-[8px] text-zinc-300 font-mono italic tracking-tighter uppercase font-bold">Data_Ref: 0${index}</div>
                 </div>
 
-                <div class="mb-6">
-                    <h3 class="text-black text-3xl font-black italic uppercase tracking-tighter leading-none mb-2">${row[0]}</h3>
-                    <div class="w-12 h-1 bg-yellow-500"></div>
-                </div>
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="text-black text-2xl font-black italic uppercase tracking-tighter mb-4 border-b-2 border-transparent group-hover:border-yellow-500 transition-all inline-block">
+                        ${row[0]}
+                    </h3>
 
-                <div class="space-y-4 mb-8 flex-grow">
-                    <div class="flex flex-col border-b border-zinc-100 pb-2">
-                        <span class="text-[10px] text-zinc-400 font-mono uppercase font-bold tracking-widest leading-none mb-1">Main Property</span>
-                        <span class="text-sm text-black font-black uppercase tracking-tighter">${row[1]}</span>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="border-l border-zinc-200 pl-2">
+                            <p class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Main</p>
+                            <p class="text-xs text-black font-black uppercase tracking-tight">${row[1]}</p>
+                        </div>
+                        <div class="border-l border-zinc-200 pl-2">
+                            <p class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Sub</p>
+                            <p class="text-xs text-black font-black uppercase tracking-tight">${row[2]}</p>
+                        </div>
                     </div>
-                    <div class="flex flex-col border-b border-zinc-100 pb-2">
-                        <span class="text-[10px] text-zinc-400 font-mono uppercase font-bold tracking-widest leading-none mb-1">Sub Property</span>
-                        <span class="text-sm text-black font-black uppercase tracking-tighter">${row[2]}</span>
+
+                    <div class="bg-zinc-50 p-3 mt-auto border border-zinc-100 group-hover:bg-yellow-500/5 transition-colors">
+                        <p class="text-[10px] text-yellow-600 font-black uppercase mb-1 tracking-widest">Skill Performance</p>
+                        <p class="text-[11px] text-zinc-500 italic leading-relaxed tracking-tight">${row[3]}</p>
                     </div>
                 </div>
-
-                <div class="bg-zinc-50 p-4 border-l-4 border-black group-hover:bg-yellow-500/5 transition-colors">
-                    <p class="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Effect Description</p>
-                    <p class="text-[11px] text-zinc-700 leading-relaxed italic">${row[3]}</p>
-                </div>
-
-                <div class="absolute top-2 right-2 flex space-x-1 opacity-20">
-                    <div class="w-1.5 h-1.5 bg-black"></div>
-                    <div class="w-1.5 h-1.5 bg-yellow-500"></div>
-                </div>
+                
+                <div class="h-1.5 w-0 bg-yellow-500 group-hover:w-full transition-all duration-500"></div>
             `;
             container.appendChild(card);
         });
@@ -84,5 +89,9 @@ function clearSelection() {
     document.querySelectorAll('select').forEach(s => s.value = "");
     search();
 }
+
+const style = document.createElement('style');
+style.innerHTML = `@keyframes cardFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`;
+document.head.appendChild(style);
 
 init();
