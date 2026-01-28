@@ -11,8 +11,18 @@ async function init() {
         
         loadTags();
         console.log("Terminal Sync Complete.");
+
+        // 在資料庫和標籤載入完畢後觸發頁面顯示
+        document.body.classList.add('loaded');
+        document.getElementById('preloader').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('opacity-0', 'translate-y-8');
+
     } catch (err) {
         console.error("Initialization Failed:", err);
+        document.getElementById('result-count').innerText = "// SYSTEM_ERROR: DATA_LOAD_FAILURE";
+        document.body.classList.add('loaded'); // 即使失敗也顯示頁面
+        document.getElementById('preloader').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('opacity-0', 'translate-y-8');
     }
 }
 
@@ -22,12 +32,13 @@ function loadTags() {
 
     for (let i = 1; i <= 3; i++) {
         const select = document.getElementById(`tag${i}`);
-        select.innerHTML = '<option value="">ALL_UNITS</option>';
+        select.innerHTML = '<option value="">// ALL_UNITS</option>'; // 官網風格選項
         allTags.filter(t => t[0] === i).forEach(t => {
             select.innerHTML += `<option value="${t[1]}">${t[1]}</option>`;
         });
         select.onchange = search;
     }
+    search(); // 初始載入時顯示所有結果
 }
 
 function search() {
@@ -39,42 +50,43 @@ function search() {
     const query = "SELECT product_name, tag1, tag2, tag3 FROM products WHERE tag1 LIKE ? AND tag2 LIKE ? AND tag3 LIKE ?";
     const res = db.exec(query, [t1, t2, t3]);
 
-    container.innerHTML = "";
+    container.innerHTML = ""; // 清空舊的卡片
     if (res.length > 0) {
         const rows = res[0].values;
         document.getElementById('result-count').innerText = `// DATABASE_ENTRY: ${rows.length} MATCHES FOUND`;
 
         rows.forEach((row, index) => {
             const card = document.createElement('div');
-            card.className = "bg-white border border-zinc-200 p-0 hover:border-black transition-all duration-500 group relative flex flex-col";
-            card.style.animation = `cardFadeIn 0.5s ease forwards ${index * 0.05}s`;
-            card.style.opacity = 0;
+            // 官網卡片風格：純白背景、極細邊框、底部黃色進度條裝飾
+            card.className = "bg-white border border-zinc-200 group hover:border-black transition-all duration-300 flex flex-col relative overflow-hidden";
+            card.style.animation = `cardFadeIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards ${index * 0.08}s`; // staggered reveal
+            card.style.opacity = 0; // Initial state for animation
 
             card.innerHTML = `
-                <div class="bg-[#F8F8F8] aspect-square flex items-center justify-center p-8 relative overflow-hidden">
-                    <img src="./images/${row[0]}.png" class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" onerror="this.src='./images/default.png'; this.style.opacity=0.2">
-                    <div class="absolute top-2 left-2 text-[8px] text-zinc-300 font-mono italic tracking-tighter uppercase font-bold">Data_Ref: 0${index}</div>
+                <div class="bg-zinc-50 aspect-square flex items-center justify-center p-8 relative overflow-hidden">
+                    <img src="./images/${row[0]}.png" class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" onerror="this.src='./images/default.png'; this.style.opacity=0.1;">
+                    <div class="absolute top-2 left-2 text-[8px] font-mono italic text-zinc-300 uppercase">DATA_REF: ${index + 1}</div>
                 </div>
 
                 <div class="p-6 flex flex-col flex-grow">
-                    <h3 class="text-black text-2xl font-black italic uppercase tracking-tighter mb-4 border-b-2 border-transparent group-hover:border-yellow-500 transition-all inline-block">
+                    <h3 class="text-black text-2xl font-black italic uppercase tracking-tighter mb-4 border-b-2 border-transparent group-hover:border-yellow-500 transition-all inline-block leading-none">
                         ${row[0]}
                     </h3>
 
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="border-l border-zinc-200 pl-2">
-                            <p class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Main</p>
-                            <p class="text-xs text-black font-black uppercase tracking-tight">${row[1]}</p>
+                    <div class="space-y-3 mb-6 flex-grow">
+                        <div class="flex justify-between items-center text-[11px] font-bold uppercase border-b border-zinc-100 pb-2">
+                            <span class="text-zinc-400 font-mono tracking-wide">// MAIN_PROP</span>
+                            <span class="text-black">${row[1]}</span>
                         </div>
-                        <div class="border-l border-zinc-200 pl-2">
-                            <p class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Sub</p>
-                            <p class="text-xs text-black font-black uppercase tracking-tight">${row[2]}</p>
+                        <div class="flex justify-between items-center text-[11px] font-bold uppercase border-b border-zinc-100 pb-2">
+                            <span class="text-zinc-400 font-mono tracking-wide">// SUB_PROP</span>
+                            <span class="text-black">${row[2]}</span>
                         </div>
                     </div>
 
-                    <div class="bg-zinc-50 p-3 mt-auto border border-zinc-100 group-hover:bg-yellow-500/5 transition-colors">
-                        <p class="text-[10px] text-yellow-600 font-black uppercase mb-1 tracking-widest">Skill Performance</p>
-                        <p class="text-[11px] text-zinc-500 italic leading-relaxed tracking-tight">${row[3]}</p>
+                    <div class="bg-zinc-50 p-4 border-l-4 border-black group-hover:bg-yellow-500/10 transition-colors">
+                        <p class="text-[10px] text-yellow-600 font-bold uppercase mb-1 tracking-widest">// EFFECT_DETAIL</p>
+                        <p class="text-[11px] text-zinc-700 italic leading-relaxed tracking-tight">${row[3]}</p>
                     </div>
                 </div>
                 
@@ -82,6 +94,8 @@ function search() {
             `;
             container.appendChild(card);
         });
+    } else {
+        document.getElementById('result-count').innerText = "// WARNING: NO_DATA_MATCHES_FOUND";
     }
 }
 
@@ -90,6 +104,7 @@ function clearSelection() {
     search();
 }
 
+// 注入卡片進場動畫 CSS
 const style = document.createElement('style');
 style.innerHTML = `@keyframes cardFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`;
 document.head.appendChild(style);
