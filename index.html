@@ -10,22 +10,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,900&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;900&display=swap');
 
         :root {
-            --ef-yellow: #FFCF00;   /* 警告黃 */
-            --ef-bg: #F4F4F5;       /* 官網淺灰底 */
-            --ef-white: #FFFFFF;    /* 純白卡片 */
-            --ef-border: #E4E4E7;   /* 細灰色線條 */
-            --ef-black: #18181B;    /* 文字黑 */
+            --ef-yellow: #FFCF00;   
+            --ef-bg: #FFFFFF;       
+            --ef-light-gray: #F4F4F5; 
+            --ef-black: #000000;    
+            --ef-border: #E4E4E7;   
         }
 
         body {
             background-color: var(--ef-bg);
             color: var(--ef-black);
             font-family: 'Noto Sans TC', sans-serif;
-            /* 官網特有的網格背景（淺色版） */
             background-image: 
-                linear-gradient(var(--ef-border) 1px, transparent 1px),
-                linear-gradient(90deg, var(--ef-border) 1px, transparent 1px);
-            background-size: 30px 30px;
+                linear-gradient(var(--ef-light-gray) 1px, transparent 1px),
+                linear-gradient(90deg, var(--ef-light-gray) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
 
         .ef-title {
@@ -36,100 +35,105 @@
             letter-spacing: -0.02em;
         }
 
-        /* 官網斜切按鈕（白底版：黑底黃字） */
         .ef-btn {
             background-color: var(--ef-black);
             color: var(--ef-yellow);
             font-weight: 900;
-            padding: 12px 40px;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-            transition: all 0.3s ease;
+            padding: 12px 36px;
+            clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            border: none;
+            cursor: pointer;
         }
 
         .ef-btn:hover {
             background-color: var(--ef-yellow);
             color: black;
-            transform: translateY(-2px);
+            transform: translateX(10px);
         }
 
-        /* 官網感：細線邊框裝飾 */
-        .ef-border-box {
+        .ef-container {
             border: 1px solid var(--ef-border);
             position: relative;
+            background: white;
         }
 
-        .ef-border-box::before {
-            content: "";
+        .ef-container::after {
+            content: "ID: TERMINAL_03";
             position: absolute;
-            top: -1px; left: -1px;
-            width: 10px; height: 10px;
-            border-top: 3px solid var(--ef-yellow);
-            border-left: 3px solid var(--ef-yellow);
+            bottom: -20px; right: 0;
+            font-family: 'JetBrains Mono';
+            font-size: 8px;
+            color: #A1A1AA;
         }
 
+        /* 下拉選單自定義 */
         select {
-            background-color: white !important;
-            border: 1px solid var(--ef-border) !important;
-            padding: 10px !important;
+            background: #fff;
+            border: 1px solid var(--ef-border);
+            padding: 12px;
             font-family: 'JetBrains Mono', monospace;
             outline: none;
+            cursor: pointer;
         }
 
         select:focus {
-            border-color: var(--ef-yellow) !important;
+            border-bottom: 3px solid var(--ef-yellow);
         }
     </style>
 </head>
-<body class="p-6 md:p-16">
+<body class="p-4 md:p-12 lg:p-20">
     <div class="max-w-7xl mx-auto">
-        <header class="mb-16 flex flex-col md:flex-row justify-between items-end border-b-4 border-black pb-8">
-            <div>
-                <div class="bg-black text-white text-[10px] px-2 py-1 inline-block mb-4 font-mono uppercase tracking-[0.3em]">
-                    Endfield Terminal / Database
-                </div>
-                <h1 class="ef-title text-7xl md:text-9xl leading-none text-black">
+        <header class="mb-20 flex flex-col md:flex-row justify-between items-end border-b-8 border-black pb-10">
+            <div class="relative">
+                <div class="absolute -top-10 -left-6 w-16 h-16 bg-yellow-400 opacity-20 -z-10"></div>
+                <div class="text-xs font-mono font-black mb-2 tracking-[0.4em]">// SYSTEM DATABASE</div>
+                <h1 class="ef-title text-7xl md:text-9xl text-black">
                     ENDFIELD
                 </h1>
             </div>
-            <div class="text-right mt-6 md:mt-0">
-                <p class="font-mono text-[12px] font-bold text-zinc-400 leading-none tracking-widest uppercase">System Protocol</p>
-                <p class="font-mono text-2xl font-black text-black leading-none">V.104_BIS</p>
+            <div class="mt-8 md:mt-0 text-right">
+                <div class="w-32 h-2 bg-yellow-500 mb-2 ml-auto"></div>
+                <p class="font-mono text-xl font-black text-black tracking-widest uppercase italic">Equipment_Archive</p>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-16">
-            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8 bg-white p-10 ef-border-box shadow-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-20 items-center">
+            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 ef-container p-8 shadow-sm">
                 <div class="flex flex-col">
-                    <label class="text-[11px] font-black text-zinc-400 mb-3 uppercase tracking-widest italic">01 // Base Stat</label>
+                    <label class="text-[10px] font-black text-zinc-400 mb-2 uppercase italic tracking-widest">Select // Base</label>
                     <select id="tag1"></select>
                 </div>
                 <div class="flex flex-col">
-                    <label class="text-[11px] font-black text-zinc-400 mb-3 uppercase tracking-widest italic">02 // Sub Stat</label>
+                    <label class="text-[10px] font-black text-zinc-400 mb-2 uppercase italic tracking-widest">Select // Sub</label>
                     <select id="tag2"></select>
                 </div>
                 <div class="flex flex-col">
-                    <label class="text-[11px] font-black text-zinc-400 mb-3 uppercase tracking-widest italic">03 // Skill Stat</label>
+                    <label class="text-[10px] font-black text-zinc-400 mb-2 uppercase italic tracking-widest">Select // Skill</label>
                     <select id="tag3"></select>
                 </div>
             </div>
-            <div class="flex items-center">
-                <button onclick="clearSelection()" class="ef-btn w-full text-sm">RESET ALL</button>
+            <div class="flex justify-center">
+                <button onclick="clearSelection()" class="ef-btn w-full lg:w-auto">RESET_ALL</button>
             </div>
         </div>
 
-        <div id="result-count" class="font-mono text-[11px] text-zinc-400 mb-8 border-l-4 border-zinc-200 pl-4 uppercase">
-            Standby...
+        <div id="result-count" class="font-mono text-[10px] text-zinc-400 mb-8 border-l-2 border-yellow-500 pl-4 uppercase tracking-[0.2em]">
+            Syncing data...
         </div>
 
-        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             </div>
 
-        <footer class="mt-32 pt-16 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-start opacity-60">
-            <div class="text-[11px] font-mono leading-relaxed uppercase">
-                © GRYPHLINE. HYPERGRYPH. ALL RIGHTS RESERVED.<br>
-                AUTHORIZED TERMINAL ACCESS ONLY.
+        <footer class="mt-40 py-16 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-center opacity-40">
+            <div class="text-[10px] font-mono font-bold space-y-2 mb-6 md:mb-0">
+                <p>© GRYPHLINE. HYPERGRYPH. ALL RIGHTS RESERVED.</p>
+                <p>ENDFIELD PROJECT TERMINAL v.2026</p>
             </div>
-            <div class="mt-8 md:mt-0 w-32 h-1 bg-black"></div>
+            <div class="flex space-x-2">
+                <div class="w-8 h-8 bg-black"></div>
+                <div class="w-8 h-8 bg-yellow-500"></div>
+            </div>
         </footer>
     </div>
 
