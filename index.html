@@ -3,87 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>明日方舟：終末地 BiS 查詢器</title>
+    <title>Endfield BiS - 終末地裝備查詢</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <style>
-        /* 訂製深色背景與網格裝飾 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
-            background-color: #0a0a0a;
-            color: #e5e5e5;
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-            background-size: 30px 30px;
+            background: #0d0d0d;
+            color: #d1d1d1;
+            font-family: 'Inter', sans-serif;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
-        /* 終末地黃色裝飾 */
-        .endfield-border { border-left: 4px solid #ffcf00; }
-        .endfield-button { background-color: #ffcf00; color: black; transition: all 0.2s; }
-        .endfield-button:hover { background-color: #e6bc00; transform: translateY(-2px); }
-        /* 下拉選單樣式 */
-        select { background-color: #1a1a1a !important; border-color: #333 !important; color: white !important; }
+        /* 科技感斜角效果 */
+        .beveled {
+            clip-path: polygon(0 0, 95% 0, 100% 20%, 100% 100%, 5% 100%, 0 80%);
+        }
     </style>
 </head>
-<body class="p-4 md:p-8 font-sans">
-
-    <div class="max-w-5xl mx-auto">
-        <header class="mb-8 flex justify-between items-end border-b border-zinc-800 pb-4">
-            <div>
-                <h1 class="text-3xl font-black tracking-tighter text-white uppercase italic">Endfield <span class="text-yellow-500">BiS</span></h1>
-                <p class="text-xs text-zinc-500 mt-1 uppercase tracking-widest">Equipment Database System</p>
-            </div>
-            <a href="https://wiki.biligame.com/zmd/%E6%AD%A6%E5%99%A8%E5%9B%BE%E9%89%B4" class="text-xs text-yellow-600 hover:underline">圖片來源：bilibili-Wiki</a>
+<body class="p-6">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-10 border-b-2 border-yellow-500 pb-4 inline-block">
+            <h1 class="text-4xl font-black italic tracking-tighter text-white">ENDFIELD <span class="text-yellow-500">DATABASE</span></h1>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 bg-zinc-900/50 p-6 rounded-lg border border-zinc-800 backdrop-blur-md">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 bg-zinc-900/80 p-6 beveled border border-zinc-800 shadow-2xl">
             <div class="flex flex-col">
-                <label class="text-xs text-zinc-500 font-bold mb-2 uppercase">基礎屬性</label>
-                <select id="tag1" class="p-2 rounded border border-zinc-700 outline-none"></select>
+                <label class="text-xs text-yellow-500 font-bold mb-1 uppercase tracking-widest">Base Stat</label>
+                <select id="tag1" class="bg-black border border-zinc-700 p-2 text-white outline-none focus:border-yellow-500 transition-colors"></select>
             </div>
             <div class="flex flex-col">
-                <label class="text-xs text-zinc-500 font-bold mb-2 uppercase">附加屬性</label>
-                <select id="tag2" class="p-2 rounded border border-zinc-700 outline-none"></select>
+                <label class="text-xs text-yellow-500 font-bold mb-1 uppercase tracking-widest">Sub Stat</label>
+                <select id="tag2" class="bg-black border border-zinc-700 p-2 text-white outline-none focus:border-yellow-500 transition-colors"></select>
             </div>
             <div class="flex flex-col">
-                <label class="text-xs text-zinc-500 font-bold mb-2 uppercase">技能屬性</label>
-                <select id="tag3" class="p-2 rounded border border-zinc-700 outline-none"></select>
+                <label class="text-xs text-yellow-500 font-bold mb-1 uppercase tracking-widest">Skill Stat</label>
+                <select id="tag3" class="bg-black border border-zinc-700 p-2 text-white outline-none focus:border-yellow-500 transition-colors"></select>
             </div>
             <div class="flex items-end">
-                <button onclick="clearSelection()" class="endfield-button w-full py-2 font-bold uppercase tracking-tighter rounded">
-                    列出全部數據
+                <button onclick="clearSelection()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 uppercase tracking-tighter transition-all">
+                    Reset Filter
                 </button>
             </div>
         </div>
 
-        <div id="result" class="text-sm mb-4 text-yellow-500/80 font-mono"></div>
-
-        <div class="overflow-x-auto rounded-lg border border-zinc-800 shadow-2xl">
-            <table class="w-full text-left border-collapse bg-zinc-900/30">
-                <thead>
-                    <tr class="bg-zinc-800/80 text-zinc-400 text-xs uppercase tracking-widest">
-                        <th class="p-4">圖鑑</th>
-                        <th class="p-4">裝備名稱</th>
-                        <th class="p-4">屬性 I</th>
-                        <th class="p-4">屬性 II</th>
-                        <th class="p-4">屬性 III</th>
-                    </tr>
-                </thead>
-                <tbody id="result-body" class="divide-y divide-zinc-800">
-                    <tr>
-                        <td colspan="5" class="p-12 text-center text-zinc-600 italic">
-                            請選擇屬性篩選或點擊「列出全部」
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <footer class="mt-12 py-8 border-t border-zinc-900 text-center space-y-2">
-            <p class="text-[10px] text-zinc-600 leading-relaxed max-w-lg mx-auto italic">
-                本站為個人學習專案。遊戲圖像與數據版權均歸屬原遊戲開發商所有。<br>
-                相關資源來自 Bilibili Wiki，若有侵權請聯繫移除。
-            </p>
-        </footer>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+        <div id="result-count" class="text-xs text-zinc-500 mb-4
