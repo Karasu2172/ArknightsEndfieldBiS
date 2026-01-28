@@ -7,51 +7,83 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono&display=swap');
+        
         body {
             background: #0d0d0d;
             color: #d1d1d1;
             font-family: 'Inter', sans-serif;
+            /* 背景網格線條 */
             background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
                               linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
             background-size: 20px 20px;
         }
+
         /* 科技感斜角效果 */
         .beveled {
-            clip-path: polygon(0 0, 95% 0, 100% 20%, 100% 100%, 5% 100%, 0 80%);
+            clip-path: polygon(0 0, 97% 0, 100% 15%, 100% 100%, 3% 100%, 0 85%);
         }
+
+        /* 卡片進場動畫 */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
-<body class="p-6">
+<body class="p-6 md:p-12">
     <div class="max-w-6xl mx-auto">
-        <header class="mb-10 border-b-2 border-yellow-500 pb-4 inline-block">
-            <h1 class="text-4xl font-black italic tracking-tighter text-white">ENDFIELD <span class="text-yellow-500">DATABASE</span></h1>
+        <header class="mb-10 flex justify-between items-end">
+            <div class="border-l-4 border-yellow-500 pl-4">
+                <h1 class="text-4xl font-black italic tracking-tighter text-white uppercase">
+                    Endfield <span class="text-yellow-500">Database</span>
+                </h1>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-[0.3em] mt-1">BiS Equipment Analysis System</p>
+            </div>
+            <div class="hidden md:block text-right">
+                <p class="text-[10px] text-zinc-600 font-mono">SYSTEM STATUS: <span class="text-green-500">ACTIVE</span></p>
+                <p class="text-[10px] text-zinc-600 font-mono text-xs uppercase">Terminal-03</p>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 bg-zinc-900/80 p-6 beveled border border-zinc-800 shadow-2xl">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 bg-zinc-900/60 p-6 beveled border border-zinc-800 shadow-2xl backdrop-blur-md">
             <div class="flex flex-col">
-                <label class="text-xs text-yellow-500 font-bold mb-1 uppercase tracking-widest">Base Stat</label>
-                <select id="tag1" class="bg-black border border-zinc-700 p-2 text-white outline-none focus:border-yellow-500 transition-colors"></select>
+                <label class="text-[10px] text-yellow-500 font-bold mb-2 uppercase tracking-widest">Base Stat / 基礎</label>
+                <select id="tag1" class="bg-black border border-zinc-800 p-2 text-sm text-white outline-none focus:border-yellow-500 transition-colors cursor-pointer"></select>
             </div>
             <div class="flex flex-col">
-                <label class="text-xs text-yellow-500 font-bold mb-1 uppercase tracking-widest">Sub Stat</label>
-                <select id="tag2" class="bg-black border border-zinc-700 p-2 text-white outline-none focus:border-yellow-500 transition-colors"></select>
+                <label class="text-[10px] text-yellow-500 font-bold mb-2 uppercase tracking-widest">Sub Stat / 附加</label>
+                <select id="tag2" class="bg-black border border-zinc-800 p-2 text-sm text-white outline-none focus:border-yellow-500 transition-colors cursor-pointer"></select>
             </div>
             <div class="flex flex-col">
-                <label class="text-xs text-yellow-500 font-bold mb-1 uppercase tracking-widest">Skill Stat</label>
-                <select id="tag3" class="bg-black border border-zinc-700 p-2 text-white outline-none focus:border-yellow-500 transition-colors"></select>
+                <label class="text-[10px] text-yellow-500 font-bold mb-2 uppercase tracking-widest">Skill Stat / 技能</label>
+                <select id="tag3" class="bg-black border border-zinc-800 p-2 text-sm text-white outline-none focus:border-yellow-500 transition-colors cursor-pointer"></select>
             </div>
             <div class="flex items-end">
-                <button onclick="clearSelection()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 uppercase tracking-tighter transition-all">
+                <button onclick="clearSelection()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-2 uppercase tracking-tighter transition-all active:scale-95">
                     Reset Filter
                 </button>
             </div>
         </div>
 
-        <div id="result-count" class="text-xs text-zinc-500 mb-4 font-mono"></div>
+        <div id="result-count" class="text-[10px] text-zinc-500 mb-6 font-mono border-l border-zinc-800 pl-2 uppercase tracking-widest">
+            // Initializing system...
+        </div>
 
-        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[400px]">
             </div>
+
+        <footer class="mt-20 py-10 border-t border-zinc-900 text-center">
+            <div class="inline-block bg-zinc-900 px-4 py-1 mb-4 text-[10px] text-zinc-500 font-mono tracking-widest uppercase beveled">
+                End-User-License-Agreement
+            </div>
+            <p class="text-[10px] text-zinc-600 leading-relaxed max-w-2xl mx-auto italic">
+                本程式為個人學習專案，所使用之遊戲圖像及數據版權均歸屬原遊戲開發商 Hypergryph / 鷹角網絡所有。<br>
+                相關數據參考自 Bilibili Wiki。若有侵權請連繫移除。
+            </p>
+        </footer>
     </div>
 
     <script src="script.js"></script>
