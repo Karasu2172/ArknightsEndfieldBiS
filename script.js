@@ -2,11 +2,12 @@ let db;
 let selectedValues = { tag1: '', tag2: '', tag3: '' };
 
 async function init() {
+    // 確保 preloader 動畫有足夠時間播放
     setTimeout(() => {
         const preloader = document.getElementById('preloader');
         if (preloader) preloader.classList.add('exit');
         document.getElementById('main-content').classList.replace('opacity-0', 'opacity-100');
-    }, 1500);
+    }, 1500); // 1.5秒，與打字動畫同步
 
     try {
         const config = { locateFile: file => `https://sql.js.org/dist/${file}` };
@@ -64,9 +65,9 @@ function search() {
     if (res[0]) {
         res[0].values.forEach(row => {
             const card = document.createElement('div');
-            card.className = "group bg-white border border-zinc-200 hover:border-black relative flex flex-col shadow-sm transition-all";
+            card.className = "group bg-white border border-zinc-200 hover:border-black relative flex flex-col shadow-sm transition-all overflow-hidden"; /* 添加 overflow-hidden */
             card.innerHTML = `
-                <div class="bg-[#F9F9F9] aspect-square flex items-center justify-center p-6 overflow-hidden relative">
+                <div class="bg-[#F9F9F9] aspect-square flex items-center justify-center p-6 relative scan-effect">
                     <img src="./images/${row[0]}.png" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" 
                          onerror="this.src='https://placehold.co/400x400/F9F9F9/DDD?text=ENDFIELD'; this.style.opacity=0.2">
                 </div>
