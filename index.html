@@ -3,141 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENDFIELD_GEAR_LIBRARY</title>
+    <title>ENDFIELD_DATA_TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;900&family=Inter:ital,wght@1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Inter:ital,wght@0,400;0,700;1,900&display=swap');
 
         :root {
             --ef-yellow: #ffcf00;
-            --ef-bg: #ffffff;
-            --ef-grid: rgba(0, 0, 0, 0.05);
+            --ef-black: #000000;
+            --ef-white: #ffffff;
+            --ef-gray: #f2f2f2;
+            --ef-border: #e5e5e5;
         }
 
         body {
-            background-color: var(--ef-bg);
-            color: #000;
-            font-family: 'Noto Sans TC', sans-serif;
-            /* 官網風格動態網格 */
-            background-image: radial-gradient(var(--ef-grid) 1px, transparent 0);
-            background-size: 30px 30px;
+            background-color: var(--ef-white);
+            color: var(--ef-black);
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
             overflow-x: hidden;
+            user-select: none;
         }
 
-        /* 移除點擊藍色高亮 */
-        * { -webkit-tap-highlight-color: transparent; outline: none; }
-
-        /* 自定義模擬選單：解決藍色問題 */
-        .ef-select {
-            position: relative;
-            background: #f4f4f4;
-            border-bottom: 2px solid #000;
-            cursor: pointer;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            font-weight: 900;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        .ef-select:hover { background: #ebebeb; }
-        .ef-select::after {
-            content: ""; position: absolute; right: 15px;
-            width: 0; height: 0; border-left: 5px solid transparent;
-            border-right: 5px solid transparent; border-top: 5px solid #000;
+        /* 官網動態網格背景 */
+        #bg-grid {
+            position: fixed; inset: 0; z-index: -1;
+            background-image: 
+                linear-gradient(var(--ef-border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--ef-border) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.5;
         }
 
-        .ef-options-box {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: #fff; border: 2px solid #000;
-            z-index: 100; display: none;
-            max-height: 250px; overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        /* 鼠標交互光暈 */
+        #cursor-glow {
+            position: fixed; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,207,0,0.05) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: -1;
+            transform: translate(-50%, -50%);
         }
-        .ef-opt {
-            padding: 12px 15px; font-size: 13px; font-weight: 500;
-            border-bottom: 1px solid #f0f0f0; transition: 0.2s;
-        }
-        .ef-opt:hover { background: var(--ef-yellow); color: #000; }
 
-        /* 裝備卡片：官網精緻版 */
+        /* 移除移動端點擊藍色高亮 */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* 自定義模擬選單系統 */
+        .ef-drop-container {
+            position: relative; background: var(--ef-gray);
+            border-bottom: 2px solid var(--ef-black);
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ef-drop-container:hover { background: #e8e8e8; }
+        .ef-drop-container.active { background: var(--ef-white); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+        .ef-drop-menu {
+            position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+            background: var(--ef-white); border: 2px solid var(--ef-black);
+            z-index: 100; display: none; transform-origin: top;
+            max-height: 300px; overflow-y: auto;
+        }
+        .ef-drop-item {
+            padding: 12px 16px; font-size: 14px; font-weight: 700;
+            border-bottom: 1px solid var(--ef-border); transition: 0.2s;
+        }
+        .ef-drop-item:hover { background: var(--ef-yellow); padding-left: 24px; }
+
+        /* 裝備卡片精雕 */
         .gear-card {
-            background: #fff;
-            border: 1px solid #eeeeee;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            background: var(--ef-white); border: 1px solid var(--ef-border);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; overflow: hidden;
         }
         .gear-card:hover {
-            transform: translateY(-8px);
-            border-color: #000;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            transform: translateY(-8px); border-color: var(--ef-black);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
         }
+        .gear-card::before {
+            content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,207,0,0.1), transparent);
+            transition: 0.5s;
+        }
+        .gear-card:hover::before { left: 100%; }
 
-        /* 官網標誌性斜體字 */
-        .ef-italic { font-family: 'Inter', sans-serif; font-style: italic; font-weight: 900; }
-
-        /* 載入動畫層 */
+        /* 啟動畫面 */
         #boot-screen {
-            position: fixed; inset: 0; background: #fff; z-index: 999;
+            position: fixed; inset: 0; background: var(--ef-white); z-index: 2000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .boot-bar { width: 120px; height: 2px; background: #eee; position: relative; }
-        .boot-progress { position: absolute; left: 0; height: 100%; background: #000; width: 0%; transition: 0.5s; }
+        .boot-line { width: 160px; height: 2px; background: var(--ef-border); position: relative; }
+        .boot-loader { position: absolute; height: 100%; background: var(--ef-black); width: 0%; transition: 0.5s ease-out; }
 
-        /* 手機適配調優 */
-        @media (max-width: 640px) {
-            .gear-grid { gap: 12px !important; }
-            .stat-label { font-size: 8px !important; }
-            .stat-val { font-size: 11px !important; }
+        /* 字體尺寸適配 */
+        @media (max-width: 768px) {
+            .ef-title { font-size: 1.75rem; }
+            .ef-label { font-size: 10px; }
+            .gear-name { font-size: 14px !important; }
+            .stat-val { font-size: 12px !important; }
         }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-6 md:p-12">
+
+    <div id="bg-grid"></div>
+    <div id="cursor-glow"></div>
 
     <div id="boot-screen">
-        <div class="boot-bar"><div id="boot-progress" class="boot-progress"></div></div>
-        <p class="mt-4 text-[9px] tracking-[0.4em] font-black uppercase text-zinc-400">System_Loading...</p>
+        <div class="mb-6 opacity-20"><svg width="40" height="40" viewBox="0 0 100 100"><rect width="100" height="100" fill="black"/></svg></div>
+        <div class="boot-line"><div id="boot-progress" class="boot-loader"></div></div>
+        <p class="mt-4 text-[9px] tracking-[0.5em] font-black uppercase text-zinc-400">Syncing_System_Core</p>
     </div>
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-10 animate__animated animate__fadeIn">
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="bg-black text-white p-2 px-3 ef-italic text-2xl">E</div>
-                <h1 class="text-3xl font-black ef-italic tracking-tighter uppercase">Endfield_Gear</h1>
+        <header class="relative mb-16 flex flex-col md:flex-row justify-between items-start md:items-end animate__animated animate__fadeInDown">
+            <div class="border-l-8 border-black pl-6">
+                <h1 class="ef-title text-5xl font-black italic tracking-tighter uppercase leading-none">
+                    Endfield <span class="text-yellow-400">Data</span>
+                </h1>
+                <p class="text-[10px] md:text-xs text-zinc-400 mt-2 tracking-[0.4em] font-bold">// ACCESS_PROTOCOL: BiS_SYNC_V2</p>
             </div>
-            <div class="flex justify-between items-end border-b-2 border-zinc-100 pb-4">
-                <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.3em] leading-none">// Protocol_BiS_Search_Terminal</p>
-                <button onclick="clearAll()" class="text-[10px] font-black uppercase tracking-widest hover:text-yellow-500 transition-colors">Reset_All</button>
+            <div class="mt-8 md:mt-0 flex items-center space-x-4">
+                <div class="text-right hidden md:block">
+                    <p class="text-[9px] font-black text-zinc-300 tracking-widest uppercase">System_Status</p>
+                    <p class="text-[10px] font-bold text-green-500">STABLE</p>
+                </div>
+                <button onclick="clearUI()" class="bg-black text-white px-10 py-4 text-[11px] font-black tracking-[0.2em] uppercase hover:bg-yellow-400 hover:text-black transition-all">
+                    Reset_Logic
+                </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate__animated animate__fadeInUp">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 animate__animated animate__fadeInUp">
             <div class="space-y-2">
-                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Base_Stat</span>
-                <div class="ef-select" id="s-target-1" onclick="toggleDrop(1)">
-                    <span id="s-val-1">-- SELECT --</span>
-                    <div id="s-box-1" class="ef-options-box"></div>
+                <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Base_Attribute</label>
+                <div class="ef-drop-container" onclick="toggleDrop(1)">
+                    <div id="val-1" class="p-4 text-sm font-black italic italic uppercase tracking-tight">-- SELECT --</div>
+                    <div id="menu-1" class="ef-drop-menu shadow-2xl"></div>
                 </div>
             </div>
             <div class="space-y-2">
-                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Sub_Stat</span>
-                <div class="ef-select" id="s-target-2" onclick="toggleDrop(2)">
-                    <span id="s-val-2">-- SELECT --</span>
-                    <div id="s-box-2" class="ef-options-box"></div>
+                <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Sub_Attribute</label>
+                <div class="ef-drop-container" onclick="toggleDrop(2)">
+                    <div id="val-2" class="p-4 text-sm font-black italic italic uppercase tracking-tight">-- SELECT --</div>
+                    <div id="menu-2" class="ef-drop-menu shadow-2xl"></div>
                 </div>
             </div>
             <div class="space-y-2">
-                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Skill_Logic</span>
-                <div class="ef-select" id="s-target-3" onclick="toggleDrop(3)">
-                    <span id="s-val-3">-- SELECT --</span>
-                    <div id="s-box-3" class="ef-options-box"></div>
+                <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Skill_Effect</label>
+                <div class="ef-drop-container" onclick="toggleDrop(3)">
+                    <div id="val-3" class="p-4 text-sm font-black italic italic uppercase tracking-tight">-- SELECT --</div>
+                    <div id="menu-3" class="ef-drop-menu shadow-2xl"></div>
                 </div>
             </div>
         </div>
 
-        <div id="result-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"></div>
+        <div id="data-count" class="text-[9px] text-zinc-300 font-mono mb-6 text-right uppercase tracking-[0.3em]"></div>
+
+        <div id="result-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8"></div>
+
+        <footer class="mt-32 py-16 border-t border-zinc-100 flex flex-col items-center">
+            <div class="flex space-x-8 mb-8 opacity-20">
+                <div class="w-1 h-8 bg-black"></div>
+                <div class="w-1 h-8 bg-yellow-400"></div>
+                <div class="w-1 h-8 bg-black"></div>
+            </div>
+            <p class="text-[10px] text-zinc-400 tracking-[0.5em] font-medium uppercase">Endfield_Industry_Standard_Protocol</p>
+        </footer>
     </div>
 
     <script src="script.js"></script>
