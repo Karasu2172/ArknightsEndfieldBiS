@@ -8,85 +8,81 @@
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,900&family=Noto+Sans+TC:wght@300;400;700&display=swap');
-
         :root { --ef-yellow: #FFCF00; }
-        body { 
-            background-color: #fff; 
-            background-image: radial-gradient(#E5E5E5 1px, transparent 0); 
-            background-size: 24px 24px; 
-            font-family: 'Noto Sans TC', sans-serif;
-            -webkit-font-smoothing: antialiased;
+        body { background-color: #fff; background-image: radial-gradient(#E5E5E5 1px, transparent 0); background-size: 24px 24px; font-family: 'Noto Sans TC', sans-serif; }
+
+        /* 完全移除原生藍色：使用模擬下拉框樣式 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger {
+            background: #F9F9F9; border: 2px solid #E5E5E5; padding: 12px 16px;
+            font-weight: 700; font-size: 13px; cursor: pointer; display: flex;
+            justify-content: space-between; align-items: center; transition: all 0.2s;
         }
+        .custom-select-trigger:hover { border-color: #000; }
+        .custom-select-trigger.active { border-color: var(--ef-yellow); background: #fff; }
 
-        /* Preloader */
-        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.5s ease-in-out; }
-        #preloader.exit { transform: translateY(-100%); }
-        .loader-logo { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; font-size: 3rem; color: var(--ef-yellow); border-right: 3px solid var(--ef-yellow); white-space: nowrap; overflow: hidden; width: 0; animation: typing 0.8s steps(10) forwards; }
-        @keyframes typing { from { width: 0 } to { width: 240px } }
-
-        /* 自定義選單設計：移除突兀藍色 */
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1em;
-            cursor: pointer;
+        .custom-options {
+            position: absolute; top: 100%; left: 0; right: 0; background: #fff;
+            border: 2px solid #000; z-index: 50; display: none; max-height: 250px; overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-
-        /* 選單選項樣式 (部分瀏覽器支援有限，主要靠 Hover 補強) */
-        select option {
-            background-color: white;
-            color: black;
-            padding: 10px;
+        .custom-options.show { display: block; }
+        .custom-option {
+            padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.1s;
         }
+        /* 取代突兀藍色：Hover 時變為終末地黃色 */
+        .custom-option:hover { background: var(--ef-yellow); color: #000; }
 
-        /* 斜切按鈕 */
-        .ef-btn { background: #000; color: var(--ef-yellow); font-family: 'Barlow Condensed'; font-style: italic; font-weight: 700; clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%); transition: all 0.2s; cursor: pointer; border: none; font-size: 1.1rem; outline: none; }
+        .ef-btn { background: #000; color: var(--ef-yellow); font-family: 'Barlow Condensed'; font-style: italic; font-weight: 700; clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%); transition: all 0.2s; cursor: pointer; border: none; }
         .ef-btn:hover { background: var(--ef-yellow); color: #000; }
 
-        .scan-effect::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.08), transparent); transform: translateY(-100%); }
-        .group:hover .scan-effect::after { animation: cardScan 2s linear infinite; }
-        @keyframes cardScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.5s ease-in-out; }
+        #preloader.exit { transform: translateY(-100%); }
     </style>
 </head>
-<body class="p-6 md:p-10 lg:p-16">
-    <div id="preloader"><div class="loader-logo">ENDFIELD</div></div>
+<body class="p-6 md:p-12 lg:p-16">
+    <div id="preloader"><div class="text-[var(--ef-yellow)] font-black text-4xl italic border-r-4 border-[var(--ef-yellow)] pr-4">ENDFIELD</div></div>
 
-    <div id="main-content" class="max-w-[1280px] mx-auto opacity-0 transition-opacity duration-500">
+    <div id="main-content" class="max-w-[1340px] mx-auto opacity-0 transition-opacity duration-500">
         <header class="mb-16 border-b-4 border-black pb-6 flex justify-between items-end">
             <div>
                 <p class="text-[9px] font-mono font-bold tracking-[0.5em] text-zinc-400 mb-1 uppercase">// PROTOCOL: ARCHIVE_SYNC</p>
                 <h1 style="font-family:'Barlow Condensed'; font-style:italic" class="text-6xl md:text-8xl font-black leading-tight">ENDFIELD</h1>
             </div>
-            <div class="text-right hidden md:block">
+            <div class="hidden md:block text-right">
                 <div class="w-24 h-3 bg-yellow-500 mb-2 ml-auto"></div>
-                <p class="font-mono text-sm font-bold italic tracking-tighter">OS_v1.0.5</p>
+                <p class="font-mono text-sm font-bold italic tracking-tighter">DATA_ACCESS_v1.0.6</p>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-12 bg-white border border-zinc-200 p-6 shadow-sm relative">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12 bg-white border border-zinc-200 p-8 shadow-sm">
             <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="flex flex-col">
-                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic tracking-widest uppercase">01 // BASE_STAT</label>
-                    <select id="tag1" class="border-2 border-zinc-100 p-3 bg-zinc-50 font-bold text-[13px] outline-none focus:border-yellow-500 focus:bg-white transition-all hover:border-zinc-300"></select>
+                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic uppercase">01 // BASE_STAT</label>
+                    <div class="custom-select-container" id="select-tag1">
+                        <div class="custom-select-trigger">-- NO_FILTER -- <span>▼</span></div>
+                        <div class="custom-options"></div>
+                    </div>
                 </div>
                 <div class="flex flex-col">
-                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic tracking-widest uppercase">02 // SUB_STAT</label>
-                    <select id="tag2" class="border-2 border-zinc-100 p-3 bg-zinc-50 font-bold text-[13px] outline-none focus:border-yellow-500 focus:bg-white transition-all hover:border-zinc-300"></select>
+                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic uppercase">02 // SUB_STAT</label>
+                    <div class="custom-select-container" id="select-tag2">
+                        <div class="custom-select-trigger">-- NO_FILTER -- <span>▼</span></div>
+                        <div class="custom-options"></div>
+                    </div>
                 </div>
                 <div class="flex flex-col">
-                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic tracking-widest uppercase">03 // SKILL_STAT</label>
-                    <select id="tag3" class="border-2 border-zinc-100 p-3 bg-zinc-50 font-bold text-[13px] outline-none focus:border-yellow-500 focus:bg-white transition-all hover:border-zinc-300"></select>
+                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic uppercase">03 // SKILL_STAT</label>
+                    <div class="custom-select-container" id="select-tag3">
+                        <div class="custom-select-trigger">-- NO_FILTER -- <span>▼</span></div>
+                        <div class="custom-options"></div>
+                    </div>
                 </div>
             </div>
-            <button onclick="clearSelection()" class="ef-btn px-8 py-4 self-end mt-4 lg:mt-0">RESET_LOG</button>
+            <button onclick="clearAllFilters()" class="ef-btn px-8 py-4 self-end">RESET_LOG</button>
         </div>
 
-        <div id="result-count" class="font-mono text-[9px] text-zinc-400 mb-8 border-l-2 border-yellow-500 pl-3 uppercase tracking-widest font-bold">
-            // TERMINAL_READY
-        </div>
-
+        <div id="result-count" class="font-mono text-[9px] text-zinc-400 mb-8 border-l-2 border-yellow-500 pl-3 uppercase font-bold tracking-widest">// SYSTEM_READY</div>
         <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
     </div>
     <script src="script.js"></script>
