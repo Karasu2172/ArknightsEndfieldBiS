@@ -10,50 +10,64 @@
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=Noto+Sans+TC:wght@400;900&display=swap');
 
         :root { --ef-yellow: #FFCF00; }
-        body { background-color: #fff; background-image: radial-gradient(#E8E8E8 1px, transparent 0); background-size: 40px 40px; }
+        body { 
+            background-color: #fff; 
+            background-image: radial-gradient(#E8E8E8 1px, transparent 0); 
+            background-size: 50px 50px; 
+            margin: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
 
         /* Preloader */
         #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
         #preloader.exit { transform: translateY(-100%); }
-        .loader-logo { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; font-size: 5rem; color: var(--ef-yellow); border-right: 5px solid var(--ef-yellow); white-space: nowrap; overflow: hidden; width: 0; animation: typing 1s steps(10) forwards; }
-        @keyframes typing { from { width: 0 } to { width: 400px } }
+        .loader-logo { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; font-size: 6rem; color: var(--ef-yellow); border-right: 8px solid var(--ef-yellow); white-space: nowrap; overflow: hidden; width: 0; animation: typing 1s steps(10) forwards; }
+        @keyframes typing { from { width: 0 } to { width: 450px } }
 
-        /* 官網斜切按鈕 */
-        .ef-btn { background: #000; color: var(--ef-yellow); font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.3s; cursor: pointer; }
-        .ef-btn:hover { background: var(--ef-yellow); color: #000; transform: translateX(5px); }
+        /* 官網斜切按鈕 - 加大版 */
+        .ef-btn { background: #000; color: var(--ef-yellow); font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.3s; cursor: pointer; border: none; }
+        .ef-btn:hover { background: var(--ef-yellow); color: #000; transform: scale(1.05); }
 
         /* 掃描特效 */
-        .scan-effect::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.1), transparent); transform: translateY(-100%); }
+        .scan-effect::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.15), transparent); transform: translateY(-100%); }
         .group:hover .scan-effect::after { animation: cardScan 1.5s linear infinite; }
         @keyframes cardScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
     </style>
 </head>
-<body class="p-8 md:p-20">
+<body class="p-8 md:p-24">
     <div id="preloader"><div class="loader-logo">ENDFIELD</div></div>
 
-    <div id="main-content" class="max-w-[1600px] mx-auto opacity-0 transition-opacity duration-1000">
-        <header class="mb-24 border-b-[12px] border-black pb-10 flex justify-between items-end">
+    <div id="main-content" class="max-w-[1800px] mx-auto opacity-0 transition-opacity duration-1000">
+        <header class="mb-32 border-b-[16px] border-black pb-12 flex justify-between items-end">
             <div>
-                <p class="text-xs font-mono font-bold tracking-[0.5em] text-zinc-400 mb-2">// TERMINAL_DATA_SYNC</p>
-                <h1 style="font-family:'Barlow Condensed'; font-style:italic" class="text-8xl md:text-[12rem] font-black leading-none">ENDFIELD</h1>
+                <p class="text-sm font-mono font-black tracking-[0.6em] text-zinc-400 mb-4 uppercase">// SYSTEM_STATUS: TERMINAL_ONLINE</p>
+                <h1 style="font-family:'Barlow Condensed'; font-style:italic" class="text-9xl md:text-[14rem] font-black leading-[0.8] mb-4">ENDFIELD</h1>
             </div>
-            <div class="text-right hidden md:block">
-                <div class="w-48 h-6 bg-yellow-500 mb-4 ml-auto"></div>
-                <p class="font-mono text-3xl font-black italic tracking-tighter">ARCHIVE_SYSTEM_v2.6</p>
+            <div class="text-right hidden xl:block">
+                <div class="w-64 h-8 bg-yellow-500 mb-6 ml-auto"></div>
+                <p class="font-mono text-4xl font-black italic tracking-tighter">ARCHIVE_ACCESS_v2.0</p>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-10 mb-20 bg-white border border-zinc-200 p-10 shadow-xl">
-            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div class="flex flex-col"><label class="text-xs font-black text-zinc-400 mb-3 italic">01 // BASE</label><select id="tag1" class="border-2 border-zinc-100 p-4 bg-zinc-50 font-bold text-lg outline-none focus:border-yellow-500"></select></div>
-                <div class="flex flex-col"><label class="text-xs font-black text-zinc-400 mb-3 italic">02 // SUB</label><select id="tag2" class="border-2 border-zinc-100 p-4 bg-zinc-50 font-bold text-lg outline-none focus:border-yellow-500"></select></div>
-                <div class="flex flex-col"><label class="text-xs font-black text-zinc-400 mb-3 italic">03 // SKILL</label><select id="tag3" class="border-2 border-zinc-100 p-4 bg-zinc-50 font-bold text-lg outline-none focus:border-yellow-500"></select></div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-24 bg-white border-2 border-zinc-200 p-12 shadow-2xl">
+            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="flex flex-col"><label class="text-sm font-black text-zinc-400 mb-4 italic tracking-widest">01 // SELECT_BASE</label><select id="tag1" class="border-4 border-zinc-100 p-6 bg-zinc-50 font-black text-2xl outline-none focus:border-yellow-500 transition-colors"></select></div>
+                <div class="flex flex-col"><label class="text-sm font-black text-zinc-400 mb-4 italic tracking-widest">02 // SELECT_SUB</label><select id="tag2" class="border-4 border-zinc-100 p-6 bg-zinc-50 font-black text-2xl outline-none focus:border-yellow-500 transition-colors"></select></div>
+                <div class="flex flex-col"><label class="text-sm font-black text-zinc-400 mb-4 italic tracking-widest">03 // SELECT_SKILL</label><select id="tag3" class="border-4 border-zinc-100 p-6 bg-zinc-50 font-black text-2xl outline-none focus:border-yellow-500 transition-colors"></select></div>
             </div>
-            <button onclick="clearSelection()" class="ef-btn text-2xl px-12 py-6 self-end">RESET_ALL</button>
+            <button onclick="clearSelection()" class="ef-btn text-3xl px-16 py-8 self-end">RESET_TERMINAL</button>
         </div>
 
-        <div id="result-count" class="font-mono text-sm text-zinc-400 mb-12 border-l-8 border-yellow-500 pl-6 uppercase tracking-widest font-bold">Syncing...</div>
-        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
+        <div id="result-count" class="font-mono text-lg text-zinc-400 mb-16 border-l-[12px] border-yellow-500 pl-8 uppercase tracking-widest font-black italic">
+            // Awaiting database link...
+        </div>
+
+        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12"></div>
+
+        <footer class="mt-48 py-20 border-t-2 border-zinc-200 opacity-30 flex justify-between font-mono text-xs font-bold uppercase tracking-[0.4em]">
+            <p>© GRYPHLINE / HYPERGRYPH. ALL RIGHTS RESERVED.</p>
+            <p>ACCESS_LOG: 2026_ADMIN_KRS</p>
+        </footer>
     </div>
     <script src="script.js"></script>
 </body>
