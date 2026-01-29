@@ -1,10 +1,11 @@
 let db;
-let activeFilters = ["", "", ""];
+let selectedTags = ["", "", ""];
 
+// 初始化系統
 async function init() {
-    const prog = document.getElementById('boot-progress');
+    const bar = document.getElementById('boot-progress');
     try {
-        prog.style.width = '30%';
+        bar.style.width = '30%';
         const config = { locateFile: file => `https://sql.js.org/dist/${file}` };
         const SQL = await initSqlJs(config);
         
@@ -12,83 +13,114 @@ async function init() {
         const buf = await res.arrayBuffer();
         db = new SQL.Database(new Uint8Array(buf));
         
-        prog.style.width = '100%';
+        bar.style.width = '100%';
         setTimeout(() => {
-            document.getElementById('boot-screen').classList.add('animate__animated', 'animate__fadeOut');
-            setTimeout(() => document.getElementById('boot-screen').style.display = 'none', 500);
-            setupCustomDrops();
+            const screen = document.getElementById('boot-screen');
+            screen.classList.add('animate__animated', 'animate__fadeOut');
+            setTimeout(() => screen.style.display = 'none', 500);
+            renderDrops();
             search();
-        }, 600);
-    } catch (err) { console.error(err); }
+        }, 800);
+    } catch (e) { console.error(e); }
 }
 
-function setupCustomDrops() {
+// 鼠標交互光暈邏輯
+document.addEventListener('mousemove', (e) => {
+    const glow = document.getElementById('cursor-glow');
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+});
+
+// 構建自定義選單
+function renderDrops() {
     const res = db.exec("SELECT category, tag_name FROM tags");
     if (!res.length) return;
     const tags = res[0].values;
 
     for (let i = 1; i <= 3; i++) {
-        const box = document.getElementById(`s-box-${i}`);
-        box.innerHTML = `<div class="ef-opt font-black text-zinc-300" onclick="pick(event, ${i}, '', '-- SELECT --')">RESET</div>`;
+        const menu = document.getElementById(`menu-${i}`);
+        menu.innerHTML = `<div class="ef-drop-item italic text-zinc-300" onclick="selectTag(${i}, '', '-- SELECT --')">ALL_UNITS</div>`;
         
         tags.filter(t => t[0] === i).forEach(t => {
-            const d = document.createElement('div');
-            d.className = "ef-opt";
-            d.innerText = t[1];
-            d.onclick = (e) => pick(e, i, t[1], t[1]);
-            box.appendChild(d);
+            const item = document.createElement('div');
+            item.className = "ef-drop-item";
+            item.innerText = t[1];
+            item.onclick = (e) => {
+                e.stopPropagation();
+                selectTag(i, t[1], t[1]);
+            };
+            menu.appendChild(item);
         });
     }
 }
 
 function toggleDrop(id) {
-    const box = document.getElementById(`s-box-${id}`);
-    const isShow = box.style.display === 'block';
-    document.querySelectorAll('.ef-options-box').forEach(b => b.style.display = 'none');
-    box.style.display = isShow ? 'none' : 'block';
+    const menu = document.getElementById(`menu-${id}`);
+    const container = menu.parentElement;
+    const isOpen = menu.style.display === 'block';
+    
+    document.querySelectorAll('.ef-drop-menu').forEach(m => m.style.display = 'none');
+    document.querySelectorAll('.ef-drop-container').forEach(c => c.classList.remove('active'));
+    
+    if (!isOpen) {
+        menu.style.display = 'block';
+        container.classList.add('active');
+        menu.classList.add('animate__animated', 'animate__fadeIn');
+    }
 }
 
-function pick(e, cat, val, txt) {
-    e.stopPropagation();
-    activeFilters[cat-1] = val;
-    document.getElementById(`s-val-${cat}`).innerText = txt;
-    document.getElementById(`s-box-${cat}`).style.display = 'none';
+function selectTag(cat, val, txt) {
+    selectedTags[cat-1] = val;
+    document.getElementById(`val-${cat}`).innerText = txt;
+    document.getElementById(`menu-${cat}`).style.display = 'none';
+    document.getElementById(`menu-${cat}`).parentElement.classList.remove('active');
     search();
 }
 
-window.onclick = () => document.querySelectorAll('.ef-options-box').forEach(b => b.style.display = 'none');
+// 點擊空白處關閉選單
+window.onclick = (e) => {
+    if (!e.target.closest('.ef-drop-container')) {
+        document.querySelectorAll('.ef-drop-menu').forEach(m => m.style.display = 'none');
+        document.querySelectorAll('.ef-drop-container').forEach(c => c.classList.remove('active'));
+    }
+};
 
 function search() {
     const grid = document.getElementById('result-grid');
-    const params = activeFilters.map(f => f || '%');
+    const params = selectedTags.map(s => s || '%');
 
     try {
         const res = db.exec("SELECT product_name, tag1, tag2, tag3 FROM products WHERE tag1 LIKE ? AND tag2 LIKE ? AND tag3 LIKE ?", params);
         grid.innerHTML = "";
+        
         if (res.length > 0) {
-            res[0].values.forEach((row, i) => {
+            const rows = res[0].values;
+            document.getElementById('data-count').innerText = `// SYNC_COMPLETE: ${rows.length}_UNITS_IDENTIFIED`;
+            
+            rows.forEach((row, i) => {
                 const card = document.createElement('div');
                 card.className = "gear-card animate__animated animate__fadeInUp";
-                card.style.animationDelay = `${i * 0.03}s`;
+                card.style.animationDelay = `${i * 0.04}s`;
+                
                 card.innerHTML = `
-                    <div class="aspect-square bg-[#fcfcfc] flex items-center justify-center p-6 relative group overflow-hidden">
-                        <img src="./images/${row[0]}.png" class="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-110" onerror="this.src='./images/default.png';">
-                        <div class="absolute bottom-0 left-0 w-0 h-1 bg-yellow-400 group-hover:w-full transition-all duration-500"></div>
+                    <div class="aspect-square bg-[#fcfcfc] flex items-center justify-center p-8 relative group overflow-hidden border-b border-zinc-50">
+                        <img src="./images/${row[0]}.png" class="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-110" onerror="this.src='./images/default.png';">
+                        <div class="absolute top-2 right-2 text-[8px] font-black text-zinc-200 tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity uppercase italic italic">E-ID: ${Math.random().toString(36).substr(2, 5)}</div>
                     </div>
-                    <div class="p-4 border-t border-zinc-50">
-                        <h3 class="font-black italic text-sm tracking-tighter uppercase mb-4 truncate border-l-4 border-black pl-2 leading-none">${row[0]}</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <span class="stat-label text-[8px] font-black text-zinc-300 uppercase tracking-widest italic">Main</span>
-                                <span class="stat-val text-[11px] font-bold text-zinc-800">${row[1]}</span>
+                    <div class="p-5">
+                        <h3 class="gear-name font-black italic italic text-base tracking-tighter uppercase mb-5 border-l-4 border-black pl-3 leading-none truncate">${row[0]}</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-end border-b border-zinc-100 pb-1">
+                                <span class="text-[9px] font-black text-zinc-300 uppercase tracking-widest italic">Base_Stat</span>
+                                <span class="stat-val text-sm font-bold text-zinc-800">${row[1]}</span>
                             </div>
-                            <div class="flex justify-between items-center">
-                                <span class="stat-label text-[8px] font-black text-zinc-300 uppercase tracking-widest italic">Sub</span>
-                                <span class="stat-val text-[11px] font-bold text-zinc-800">${row[2]}</span>
+                            <div class="flex justify-between items-end border-b border-zinc-100 pb-1">
+                                <span class="text-[9px] font-black text-zinc-300 uppercase tracking-widest italic">Sub_Stat</span>
+                                <span class="stat-val text-sm font-bold text-zinc-800">${row[2]}</span>
                             </div>
-                            <div class="mt-4 pt-3 border-t border-zinc-100 relative">
-                                <span class="text-[7px] font-black text-yellow-500 uppercase tracking-tighter italic">// EFFECT_PROTO</span>
-                                <p class="text-[10px] text-zinc-500 font-medium leading-tight mt-1 line-clamp-2 h-7 italic">${row[3]}</p>
+                            <div class="mt-6 pt-4 relative bg-zinc-50/50 p-2 border-r-4 border-yellow-400">
+                                <span class="text-[8px] font-black text-yellow-500 uppercase tracking-widest italic leading-none">// Skill_Logic</span>
+                                <p class="text-[11px] text-zinc-500 font-bold leading-tight mt-2 line-clamp-2 h-8 italic italic">${row[3]}</p>
                             </div>
                         </div>
                     </div>
@@ -99,9 +131,9 @@ function search() {
     } catch (e) { console.error(e); }
 }
 
-function clearAll() {
-    activeFilters = ["", "", ""];
-    [1,2,3].forEach(i => document.getElementById(`s-val-${i}`).innerText = '-- SELECT --');
+function clearUI() {
+    selectedTags = ["", "", ""];
+    [1,2,3].forEach(i => document.getElementById(`val-${i}`).innerText = '-- SELECT --');
     search();
 }
 
