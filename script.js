@@ -3,9 +3,10 @@ let selectedValues = { tag1: '', tag2: '', tag3: '' };
 
 async function init() {
     setTimeout(() => {
-        document.getElementById('preloader').classList.add('exit');
+        const preloader = document.getElementById('preloader');
+        if (preloader) preloader.classList.add('exit');
         document.getElementById('main-content').classList.replace('opacity-0', 'opacity-100');
-    }, 2000);
+    }, 1500);
 
     try {
         const config = { locateFile: file => `https://sql.js.org/dist/${file}` };
@@ -14,7 +15,7 @@ async function init() {
         const buf = await response.arrayBuffer();
         db = new SQL.Database(new Uint8Array(buf));
         loadCustomTags();
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Database Init Error:", err); }
 }
 
 function loadCustomTags() {
@@ -27,13 +28,11 @@ function loadCustomTags() {
         const optionsDiv = container.querySelector('.custom-options');
         const trigger = container.querySelector('.custom-select-trigger');
 
-        // 清空並加入初始選項
         optionsDiv.innerHTML = `<div class="custom-option" data-value="">-- NO_FILTER --</div>`;
         allTags.filter(t => t[0] === i).forEach(t => {
             optionsDiv.innerHTML += `<div class="custom-option" data-value="${t[1]}">${t[1]}</div>`;
         });
 
-        // 點擊觸發下拉
         trigger.onclick = (e) => {
             e.stopPropagation();
             closeAllDropdowns();
@@ -41,7 +40,6 @@ function loadCustomTags() {
             trigger.classList.toggle('active');
         };
 
-        // 選項點擊事件
         optionsDiv.querySelectorAll('.custom-option').forEach(opt => {
             opt.onclick = () => {
                 const val = opt.getAttribute('data-value');
@@ -72,24 +70,26 @@ function search() {
                     <img src="./images/${row[0]}.png" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" 
                          onerror="this.src='https://placehold.co/400x400/F9F9F9/DDD?text=ENDFIELD'; this.style.opacity=0.2">
                 </div>
-                <div class="p-5 flex-grow flex flex-col">
-                    <h3 class="font-black italic text-xl mb-4 uppercase border-b border-black pb-1 inline-block">${row[0]}</h3>
-                    <div class="grid grid-cols-2 gap-3 mb-5">
-                        <div class="border-l border-zinc-200 pl-2">
-                            <p class="text-[8px] text-zinc-400 font-bold uppercase mb-0.5">Base</p>
-                            <p class="text-sm font-bold text-black">${row[1]}</p>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="font-black italic text-2xl mb-5 uppercase border-b-2 border-black pb-2 inline-block tracking-tighter">${row[0]}</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="border-l-2 border-zinc-200 pl-3">
+                            <p class="text-[9px] text-zinc-400 font-bold uppercase mb-1 tracking-widest">Base</p>
+                            <p class="text-lg font-black text-black leading-none">${row[1]}</p>
                         </div>
-                        <div class="border-l border-zinc-200 pl-2">
-                            <p class="text-[8px] text-zinc-400 font-bold uppercase mb-0.5">Sub</p>
-                            <p class="text-sm font-bold text-black">${row[2]}</p>
+                        <div class="border-l-2 border-zinc-200 pl-3">
+                            <p class="text-[9px] text-zinc-400 font-bold uppercase mb-1 tracking-widest">Sub</p>
+                            <p class="text-lg font-black text-black leading-none">${row[2]}</p>
                         </div>
                     </div>
-                    <div class="bg-[#FAFAFA] p-3 border-l-2 border-yellow-500 mt-auto">
-                        <p class="text-[8px] text-yellow-600 font-black mb-1 tracking-widest">// SKILL_EFFECT</p>
-                        <p class="text-[12px] text-zinc-600 italic font-medium leading-snug">${row[3]}</p>
+
+                    <div class="bg-[#FAFAFA] p-4 border-l-[6px] border-yellow-500 mt-auto group-hover:bg-yellow-50/50 transition-colors">
+                        <p class="text-[10px] text-yellow-600 font-black mb-1.5 tracking-widest uppercase">// SKILL_EFFECT</p>
+                        <p class="text-[15px] text-zinc-800 italic font-bold leading-relaxed">${row[3]}</p>
                     </div>
                 </div>
-                <div class="h-[2px] w-0 bg-yellow-500 group-hover:w-full transition-all duration-500"></div>
+                <div class="h-[3px] w-0 bg-yellow-500 group-hover:w-full transition-all duration-500"></div>
             `;
             container.appendChild(card);
         });
