@@ -17,6 +17,20 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Preloader */
+        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.6s ease-in-out; }
+        #preloader.exit { transform: translateY(-100%); }
+        
+        /* 載入動畫：打字效果 */
+        .loader-logo { 
+            font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; 
+            font-size: 3.5rem; color: var(--ef-yellow); border-right: 4px solid var(--ef-yellow); 
+            white-space: nowrap; overflow: hidden; width: 0; 
+            animation: typing 1.5s steps(10) forwards, blink-caret 0.75s step-end infinite; 
+        }
+        @keyframes typing { from { width: 0 } to { width: 280px } } /* 調整寬度以適應字體大小 */
+        @keyframes blink-caret { 50% { border-color: transparent; } }
+
         /* 徹底移除原生藍色：自定義下拉組件 */
         .custom-select-container { position: relative; width: 100%; }
         .custom-select-trigger {
@@ -36,7 +50,6 @@
         .custom-option {
             padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.1s;
         }
-        /* Hover 時變為黃色，取代突兀藍色 */
         .custom-option:hover { background: var(--ef-yellow); color: #000; }
 
         .ef-btn { 
@@ -46,12 +59,22 @@
         }
         .ef-btn:hover { background: var(--ef-yellow); color: #000; }
 
-        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.5s ease-in-out; }
-        #preloader.exit { transform: translateY(-100%); }
+        /* 卡片掃描光效 */
+        .scan-effect::before { /* 調整為 ::before 避免與 img 衝突 */
+            content: ""; position: absolute; inset: 0; 
+            background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.2), transparent); 
+            transform: translateY(-100%); opacity: 0; /* 預設隱藏 */
+            transition: opacity 0.3s;
+        }
+        .group:hover .scan-effect::before { 
+            animation: cardScan 1.8s ease-in-out infinite; /* 加長動畫時間，更流暢 */
+            opacity: 1; /* 鼠標懸停時顯示 */
+        }
+        @keyframes cardScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
     </style>
 </head>
 <body class="p-6 md:p-12 lg:p-16">
-    <div id="preloader"><div class="text-[var(--ef-yellow)] font-black text-4xl italic border-r-4 border-[var(--ef-yellow)] pr-4">ENDFIELD</div></div>
+    <div id="preloader"><div class="loader-logo">ENDFIELD</div></div>
 
     <div id="main-content" class="max-w-[1340px] mx-auto opacity-0 transition-opacity duration-500">
         <header class="mb-16 border-b-4 border-black pb-6 flex justify-between items-end">
@@ -61,7 +84,7 @@
             </div>
             <div class="hidden md:block text-right">
                 <div class="w-24 h-3 bg-yellow-500 mb-2 ml-auto"></div>
-                <p class="font-mono text-sm font-bold italic tracking-tighter">DATA_ACCESS_v1.0.7</p>
+                <p class="font-mono text-sm font-bold italic tracking-tighter">DATA_ACCESS_v1.0.8</p>
             </div>
         </header>
 
@@ -70,4 +93,31 @@
                 <div class="flex flex-col">
                     <label class="text-[10px] font-bold text-zinc-400 mb-2 italic uppercase">01 // BASE_STAT</label>
                     <div class="custom-select-container" id="select-tag1">
-                        <div class="custom-select-trigger">-- NO_FILTER --
+                        <div class="custom-select-trigger">-- NO_FILTER -- <span>▼</span></div>
+                        <div class="custom-options"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic uppercase">02 // SUB_STAT</label>
+                    <div class="custom-select-container" id="select-tag2">
+                        <div class="custom-select-trigger">-- NO_FILTER -- <span>▼</span></div>
+                        <div class="custom-options"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-bold text-zinc-400 mb-2 italic uppercase">03 // SKILL_STAT</label>
+                    <div class="custom-select-container" id="select-tag3">
+                        <div class="custom-select-trigger">-- NO_FILTER -- <span>▼</span></div>
+                        <div class="custom-options"></div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="clearAllFilters()" class="ef-btn px-8 py-4 self-end">RESET_LOG</button>
+        </div>
+
+        <div id="result-count" class="font-mono text-[9px] text-zinc-400 mb-8 border-l-2 border-yellow-500 pl-3 uppercase font-bold tracking-widest">// SYSTEM_READY</div>
+        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
