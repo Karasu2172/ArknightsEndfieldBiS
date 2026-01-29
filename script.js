@@ -1,12 +1,12 @@
 let db;
 
 async function init() {
-    const safetyTimer = setTimeout(hidePreloader, 3000); // 3秒保險絲
+    const safetyTimer = setTimeout(hidePreloader, 3000); // 防卡死
 
     try {
         const config = { locateFile: file => `https://sql.js.org/dist/${file}` };
         const SQL = await initSqlJs(config);
-        const response = await fetch('./data.db'); //
+        const response = await fetch('./data.db'); // 確保路徑正確
         const buf = await response.arrayBuffer();
         db = new SQL.Database(new Uint8Array(buf));
         
@@ -14,7 +14,7 @@ async function init() {
         clearTimeout(safetyTimer);
         hidePreloader();
     } catch (err) {
-        console.error("Load Error:", err);
+        console.error("Initialization failed:", err);
         hidePreloader();
     }
 }
@@ -30,7 +30,7 @@ function loadTags() {
     const allTags = res[0].values;
     for (let i = 1; i <= 3; i++) {
         const select = document.getElementById(`tag${i}`);
-        select.innerHTML = '<option value="">-- ALL_DATA --</option>';
+        select.innerHTML = '<option value="">-- NO_FILTER --</option>';
         allTags.filter(t => t[0] === i).forEach(t => {
             select.innerHTML += `<option value="${t[1]}">${t[1]}</option>`;
         });
@@ -44,6 +44,8 @@ function search() {
     const t2 = document.getElementById('tag2').value || '%';
     const t3 = document.getElementById('tag3').value || '%';
     const container = document.getElementById('equipment-grid');
+    
+    // 從 products 資料表抓取數據
     const res = db.exec("SELECT product_name, tag1, tag2, tag3 FROM products WHERE tag1 LIKE ? AND tag2 LIKE ? AND tag3 LIKE ?", [t1, t2, t3]);
 
     container.innerHTML = "";
@@ -53,32 +55,42 @@ function search() {
 
         rows.forEach((row, idx) => {
             const card = document.createElement('div');
-            card.className = "group bg-white border-2 border-zinc-100 transition-all hover:border-black relative flex flex-col shadow-sm hover:shadow-2xl";
+            // 特大化卡片設計
+            card.className = "group bg-white border-2 border-zinc-200 transition-all hover:border-black relative flex flex-col shadow-lg hover:shadow-2xl overflow-hidden";
+            
             card.innerHTML = `
-                <div class="bg-[#F8F8F8] aspect-square flex items-center justify-center p-10 relative scan-effect overflow-hidden">
+                <div class="bg-[#F8F8F8] aspect-square flex items-center justify-center p-12 relative scan-effect overflow-hidden">
                     <img src="./images/${row[0]}.png" class="w-full h-full object-contain group-hover:scale-110 transition-all duration-700" 
-                         onerror="this.src='https://placehold.co/600x600/F8F8F8/CCC?text=ENDFIELD';">
+                         onerror="this.src='https://placehold.co/800x800/F8F8F8/CCC?text=ENDFIELD';">
+                    <div class="absolute top-4 left-4 text-xs font-mono text-zinc-400 font-bold uppercase tracking-widest">REF_ARC: ${row[0].substring(0,4)}</div>
                 </div>
-                <div class="p-10 flex-grow flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-black italic text-4xl mb-8 tracking-tighter uppercase border-b-[6px] border-black pb-3 inline-block leading-none">${row[0]}</h3>
-                        <div class="grid grid-cols-2 gap-8 mb-10">
-                            <div class="border-l-[6px] border-zinc-200 pl-4">
-                                <p class="text-xs text-zinc-400 font-black uppercase mb-2">Main_Prop</p>
-                                <p class="text-2xl font-black text-black leading-none">${row[1]}</p>
-                            </div>
-                            <div class="border-l-[6px] border-zinc-200 pl-4">
-                                <p class="text-xs text-zinc-400 font-black uppercase mb-2">Sub_Prop</p>
-                                <p class="text-2xl font-black text-black leading-none">${row[2]}</p>
-                            </div>
+
+                <div class="p-10 flex-grow flex flex-col">
+                    <h3 class="font-black italic text-5xl mb-10 tracking-tighter uppercase border-b-[8px] border-black pb-4 inline-block leading-none">${row[0]}</h3>
+                    
+                    <div class="grid grid-cols-2 gap-10 mb-12">
+                        <div class="border-l-[10px] border-zinc-200 pl-6">
+                            <p class="text-xs text-zinc-400 font-black uppercase mb-3 tracking-[0.4em]">Main_Prop</p>
+                            <p class="text-3xl font-black text-black leading-none">${row[1]}</p>
+                        </div>
+                        <div class="border-l-[10px] border-zinc-200 pl-6">
+                            <p class="text-xs text-zinc-400 font-black uppercase mb-3 tracking-[0.4em]">Sub_Prop</p>
+                            <p class="text-3xl font-black text-black leading-none">${row[2]}</p>
                         </div>
                     </div>
-                    <div class="bg-zinc-950 p-6 border-l-[16px] border-yellow-500">
-                        <p class="text-xs text-yellow-500 font-black mb-3 tracking-[0.4em]">// SYSTEM_SKILL</p>
-                        <p class="text-lg text-white italic font-bold leading-relaxed">${row[3]}</p>
+
+                    <div class="bg-black p-8 border-l-[20px] border-yellow-500 mt-auto">
+                        <div class="flex items-center mb-4">
+                            <span class="w-3 h-3 bg-yellow-500 mr-3 animate-pulse"></span>
+                            <p class="text-xs text-yellow-500 font-black tracking-[0.5em] uppercase font-mono">// SYSTEM_SKILL_LOG</p>
+                        </div>
+                        <p class="text-[22px] text-white italic font-bold leading-relaxed tracking-tight">
+                            ${row[3]}
+                        </p>
                     </div>
                 </div>
-                <div class="h-3 w-0 bg-yellow-500 group-hover:w-full transition-all duration-700"></div>
+                
+                <div class="h-4 w-0 bg-yellow-500 group-hover:w-full transition-all duration-1000"></div>
             `;
             container.appendChild(card);
         });
