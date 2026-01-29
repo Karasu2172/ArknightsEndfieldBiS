@@ -7,141 +7,54 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=Noto+Sans+TC:wght@400;900&display=swap');
 
-        :root {
-            --ef-yellow: #FFCF00;
-            --ef-bg: #FFFFFF;
-            --ef-line: rgba(0,0,0,0.03);
-        }
+        :root { --ef-yellow: #FFCF00; }
+        body { background-color: #fff; background-image: radial-gradient(#E8E8E8 1px, transparent 0); background-size: 40px 40px; }
 
-        body {
-            background-color: var(--ef-bg);
-            margin: 0;
-            overflow-x: hidden;
-            /* 官網背景：微細點陣 + 動態裝飾線 */
-            background-image: radial-gradient(circle at 1px 1px, #E8E8E8 1px, transparent 0);
-            background-size: 40px 40px;
-        }
-
-        /* 官網裝飾線條動畫 */
-        .bg-lines {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: -1;
-        }
-        .bg-line-h {
-            position: absolute; width: 100%; height: 1px;
-            background: var(--ef-line);
-            animation: lineMove 10s linear infinite;
-        }
-
-        @keyframes lineMove {
-            0% { transform: translateY(-100vh); }
-            100% { transform: translateY(100vh); }
-        }
-
-        /* --- 超強 Preloader --- */
-        #preloader {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1);
-        }
-
+        /* Preloader */
+        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
         #preloader.exit { transform: translateY(-100%); }
+        .loader-logo { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; font-size: 5rem; color: var(--ef-yellow); border-right: 5px solid var(--ef-yellow); white-space: nowrap; overflow: hidden; width: 0; animation: typing 1s steps(10) forwards; }
+        @keyframes typing { from { width: 0 } to { width: 400px } }
 
-        .loader-logo {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-style: italic;
-            font-weight: 900;
-            font-size: 4rem;
-            color: var(--ef-yellow);
-            overflow: hidden;
-            border-right: 4px solid var(--ef-yellow);
-            white-space: nowrap;
-            letter-spacing: 0.1em;
-            width: 0;
-            animation: typing 1s steps(10) forwards, blink 0.5s step-end infinite;
-        }
+        /* 官網斜切按鈕 */
+        .ef-btn { background: #000; color: var(--ef-yellow); font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.3s; cursor: pointer; }
+        .ef-btn:hover { background: var(--ef-yellow); color: #000; transform: translateX(5px); }
 
-        @keyframes typing { from { width: 0 } to { width: 320px } }
-        @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--ef-yellow) } }
-
-        /* --- 卡片掃描線特效 --- */
-        .scan-effect::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.1), transparent);
-            transform: translateY(-100%);
-            transition: none;
-        }
-        .group:hover .scan-effect::after {
-            animation: cardScan 1.5s linear infinite;
-        }
-        @keyframes cardScan {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-
-        .ef-btn-active:active { transform: scale(0.95); }
+        /* 掃描特效 */
+        .scan-effect::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.1), transparent); transform: translateY(-100%); }
+        .group:hover .scan-effect::after { animation: cardScan 1.5s linear infinite; }
+        @keyframes cardScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
     </style>
 </head>
-<body class="p-6 md:p-16">
-    <div class="bg-lines">
-        <div class="bg-line-h" style="top:20%; animation-delay:-2s"></div>
-        <div class="bg-line-h" style="top:50%; animation-delay:-5s"></div>
-        <div class="bg-line-h" style="top:80%; animation-delay:-8s"></div>
-    </div>
+<body class="p-8 md:p-20">
+    <div id="preloader"><div class="loader-logo">ENDFIELD</div></div>
 
-    <div id="preloader">
-        <div class="loader-logo">ENDFIELD</div>
-        <div class="mt-4 font-mono text-zinc-500 text-[10px] tracking-widest uppercase">Initializing terminal...</div>
-    </div>
-
-    <div id="main-content" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-1000">
-        <header class="mb-20 border-b-8 border-black pb-8 flex flex-col md:flex-row justify-between items-end">
+    <div id="main-content" class="max-w-[1600px] mx-auto opacity-0 transition-opacity duration-1000">
+        <header class="mb-24 border-b-[12px] border-black pb-10 flex justify-between items-end">
             <div>
-                <p class="text-[10px] font-mono font-bold tracking-[0.4em] text-zinc-400 mb-2 uppercase">// DATA_SOURCE: ENDFIELD_PROJECT</p>
-                <h1 style="font-family:'Barlow Condensed'; font-style:italic" class="text-7xl md:text-9xl font-black leading-none">ENDFIELD</h1>
+                <p class="text-xs font-mono font-bold tracking-[0.5em] text-zinc-400 mb-2">// TERMINAL_DATA_SYNC</p>
+                <h1 style="font-family:'Barlow Condensed'; font-style:italic" class="text-8xl md:text-[12rem] font-black leading-none">ENDFIELD</h1>
             </div>
-            <div class="text-right">
-                <div class="w-32 h-4 bg-yellow-500 mb-2 ml-auto"></div>
-                <p class="font-mono text-xl font-bold italic tracking-tighter">TERMINAL_V1.0.4</p>
+            <div class="text-right hidden md:block">
+                <div class="w-48 h-6 bg-yellow-500 mb-4 ml-auto"></div>
+                <p class="font-mono text-3xl font-black italic tracking-tighter">ARCHIVE_SYSTEM_v2.6</p>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-16 bg-white border border-zinc-200 p-8 relative">
-            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="flex flex-col">
-                    <label class="text-[10px] font-black text-zinc-400 mb-2 italic">01 // BASE_STAT</label>
-                    <select id="tag1" class="border border-zinc-100 p-2 bg-zinc-50 outline-none focus:border-yellow-500 transition-all"></select>
-                </div>
-                <div class="flex flex-col">
-                    <label class="text-[10px] font-black text-zinc-400 mb-2 italic">02 // SUB_STAT</label>
-                    <select id="tag2" class="border border-zinc-100 p-2 bg-zinc-50 outline-none focus:border-yellow-500 transition-all"></select>
-                </div>
-                <div class="flex flex-col">
-                    <label class="text-[10px] font-black text-zinc-400 mb-2 italic">03 // SKILL_STAT</label>
-                    <select id="tag3" class="border border-zinc-100 p-2 bg-zinc-50 outline-none focus:border-yellow-500 transition-all"></select>
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-10 mb-20 bg-white border border-zinc-200 p-10 shadow-xl">
+            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="flex flex-col"><label class="text-xs font-black text-zinc-400 mb-3 italic">01 // BASE</label><select id="tag1" class="border-2 border-zinc-100 p-4 bg-zinc-50 font-bold text-lg outline-none focus:border-yellow-500"></select></div>
+                <div class="flex flex-col"><label class="text-xs font-black text-zinc-400 mb-3 italic">02 // SUB</label><select id="tag2" class="border-2 border-zinc-100 p-4 bg-zinc-50 font-bold text-lg outline-none focus:border-yellow-500"></select></div>
+                <div class="flex flex-col"><label class="text-xs font-black text-zinc-400 mb-3 italic">03 // SKILL</label><select id="tag3" class="border-2 border-zinc-100 p-4 bg-zinc-50 font-bold text-lg outline-none focus:border-yellow-500"></select></div>
             </div>
-            <button onclick="clearSelection()" class="bg-black text-yellow-400 font-black italic px-8 py-4 ef-btn-active hover:bg-yellow-500 hover:text-black transition-all" style="clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);">
-                RESET_LOG
-            </button>
+            <button onclick="clearSelection()" class="ef-btn text-2xl px-12 py-6 self-end">RESET_ALL</button>
         </div>
 
-        <div id="result-count" class="font-mono text-[10px] text-zinc-400 mb-10 border-l-4 border-yellow-500 pl-4 uppercase tracking-widest">Awaiting Command...</div>
-
-        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        <div id="result-count" class="font-mono text-sm text-zinc-400 mb-12 border-l-8 border-yellow-500 pl-6 uppercase tracking-widest font-bold">Syncing...</div>
+        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
