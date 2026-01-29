@@ -1,7 +1,7 @@
 let db;
 
 async function init() {
-    const safetyTimer = setTimeout(hidePreloader, 3000); 
+    const safetyTimer = setTimeout(hidePreloader, 2500); 
 
     try {
         const config = { locateFile: file => `https://sql.js.org/dist/${file}` };
@@ -14,14 +14,16 @@ async function init() {
         clearTimeout(safetyTimer);
         hidePreloader();
     } catch (err) {
-        console.error("Load Error:", err);
+        console.error("Init Error:", err);
         hidePreloader();
     }
 }
 
 function hidePreloader() {
-    document.getElementById('preloader').classList.add('exit');
-    document.getElementById('main-content').classList.replace('opacity-0', 'opacity-100');
+    const pre = document.getElementById('preloader');
+    const main = document.getElementById('main-content');
+    if (pre) pre.classList.add('exit');
+    if (main) main.classList.replace('opacity-0', 'opacity-100');
 }
 
 function loadTags() {
@@ -30,7 +32,7 @@ function loadTags() {
     const allTags = res[0].values;
     for (let i = 1; i <= 3; i++) {
         const select = document.getElementById(`tag${i}`);
-        select.innerHTML = '<option value="">-- ALL_UNITS --</option>';
+        select.innerHTML = '<option value="">-- NO_FILTER --</option>';
         allTags.filter(t => t[0] === i).forEach(t => {
             select.innerHTML += `<option value="${t[1]}">${t[1]}</option>`;
         });
@@ -49,39 +51,39 @@ function search() {
     container.innerHTML = "";
     if (res[0]) {
         const rows = res[0].values;
-        document.getElementById('result-count').innerText = `// DATABASE_ENTRY: ${rows.length} MATCHED`;
+        document.getElementById('result-count').innerText = `// DATA_LOG: ${rows.length} UNITS_SYNCED`;
 
         rows.forEach((row, idx) => {
             const card = document.createElement('div');
-            card.className = "group bg-white border border-zinc-200 transition-all hover:border-black relative flex flex-col shadow-sm";
+            card.className = "group bg-white border border-zinc-100 transition-all hover:border-zinc-400 relative flex flex-col shadow-sm";
             
             card.innerHTML = `
-                <div class="bg-[#F6F6F6] aspect-square flex items-center justify-center p-8 relative scan-effect overflow-hidden">
+                <div class="bg-[#F9F9F9] aspect-square flex items-center justify-center p-6 relative scan-effect overflow-hidden">
                     <img src="./images/${row[0]}.png" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" 
-                         onerror="this.src='https://placehold.co/400x400/F6F6F6/A1A1AA?text=ENDFIELD'; this.style.opacity=0.3">
-                    <div class="absolute top-2 left-2 text-[8px] font-mono text-zinc-300">ID: ${row[0].substring(0,4)}</div>
+                         onerror="this.src='https://placehold.co/400x400/F9F9F9/DDD?text=ENDFIELD'; this.style.opacity=0.2">
+                    <div class="absolute top-1.5 left-1.5 text-[7px] font-mono text-zinc-300 tracking-tighter">REF_${row[0].substring(0,3)}</div>
                 </div>
 
-                <div class="p-6 flex-grow flex flex-col">
-                    <h3 class="font-black italic text-2xl mb-5 tracking-tighter uppercase border-b-2 border-black pb-2 inline-block">${row[0]}</h3>
+                <div class="p-5 flex-grow flex flex-col">
+                    <h3 class="font-black italic text-xl mb-4 tracking-tighter uppercase border-b border-black pb-1 inline-block">${row[0]}</h3>
                     
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="border-l-2 border-zinc-100 pl-3">
-                            <p class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest mb-1">Base</p>
-                            <p class="text-base font-black text-black leading-none">${row[1]}</p>
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <div class="border-l border-zinc-200 pl-2">
+                            <p class="text-[8px] text-zinc-400 font-bold uppercase mb-0.5">Base</p>
+                            <p class="text-sm font-bold text-black leading-tight">${row[1]}</p>
                         </div>
-                        <div class="border-l-2 border-zinc-100 pl-3">
-                            <p class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest mb-1">Sub</p>
-                            <p class="text-base font-black text-black leading-none">${row[2]}</p>
+                        <div class="border-l border-zinc-200 pl-2">
+                            <p class="text-[8px] text-zinc-400 font-bold uppercase mb-0.5">Sub</p>
+                            <p class="text-sm font-bold text-black leading-tight">${row[2]}</p>
                         </div>
                     </div>
 
-                    <div class="bg-zinc-50 p-4 border-l-4 border-yellow-500 mt-auto group-hover:bg-yellow-50 transition-colors">
-                        <p class="text-[9px] text-yellow-600 font-black mb-1 tracking-widest uppercase">// SKILL_LOG</p>
-                        <p class="text-[13px] text-zinc-700 italic font-medium leading-relaxed">${row[3]}</p>
+                    <div class="bg-[#FAFAFA] p-3 border-l-2 border-yellow-500 mt-auto group-hover:bg-yellow-50/50 transition-colors">
+                        <p class="text-[8px] text-yellow-600 font-black mb-1 tracking-widest uppercase">// LOG_SKILL</p>
+                        <p class="text-[12px] text-zinc-600 italic font-medium leading-snug">${row[3]}</p>
                     </div>
                 </div>
-                <div class="h-1 w-0 bg-yellow-500 group-hover:w-full transition-all duration-500"></div>
+                <div class="h-[2px] w-0 bg-yellow-500 group-hover:w-full transition-all duration-500"></div>
             `;
             container.appendChild(card);
         });
