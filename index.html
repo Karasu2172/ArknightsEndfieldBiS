@@ -8,132 +8,126 @@
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Inter:wght@300;600;900&display=swap');
 
         :root {
             --ef-yellow: #ffcf00;
-            --ef-black: #1a1a1a;
-            --ef-gray: #f2f2f2;
-            --ef-text-dim: #999;
+            --ef-black: #000000;
+            --ef-border: #e2e2e2;
+            --ef-bg-grid: rgba(0, 0, 0, 0.03);
         }
 
         body {
             background-color: #ffffff;
             color: var(--ef-black);
-            font-family: 'Inter', sans-serif;
-            /* 官網標誌性細格點背景 */
-            background-image: radial-gradient(#e5e5e5 1px, transparent 0);
-            background-size: 24px 24px;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-image: radial-gradient(var(--ef-bg-grid) 1px, transparent 0);
+            background-size: 20px 20px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 自定義載入畫面 */
+        /* 移除 iOS 默認點擊藍色高亮 */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* 自定義下拉選單：徹底解決藍色問題 */
+        .ef-select-container {
+            position: relative;
+            background: #f8f8f8;
+            border-bottom: 2px solid #000;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .ef-select-container:hover { background: #eeeeee; }
+        .ef-options {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #fff; border: 1px solid #000;
+            z-index: 100; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .ef-option {
+            padding: 12px 15px; font-size: 14px;
+            transition: all 0.2s;
+        }
+        .ef-option:hover { background: var(--ef-yellow); font-weight: bold; }
+
+        /* 官網進場動畫載入器 */
         #loader {
-            position: fixed; inset: 0; background: #fff; z-index: 9999;
+            position: fixed; inset: 0; background: #fff; z-index: 1000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+        .loader-line { width: 100px; h: 2px; background: #eee; position: relative; overflow: hidden; }
+        .loader-progress { position: absolute; left: 0; top: 0; height: 100%; background: #000; width: 0%; transition: 0.4s; }
 
-        /* 官網風格按鈕 */
-        .ef-btn {
-            position: relative; overflow: hidden;
-            background: var(--ef-black); color: #fff;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            clip-path: polygon(0 0, 90% 0, 100% 30%, 100% 100%, 10% 100%, 0 70%);
-        }
-        .ef-btn:hover { background: var(--ef-yellow); color: #000; transform: scale(1.05); }
-
-        /* 官網選單風格 */
-        select {
-            appearance: none; background: var(--ef-gray);
-            border: none; border-left: 3px solid transparent;
-            padding: 12px 16px; font-weight: 600; font-size: 14px;
-            transition: all 0.3s; width: 100%;
-        }
-        select:focus { border-left: 3px solid var(--ef-yellow); background: #fff; outline: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-
-        /* 裝備卡片精緻化 */
+        /* 裝備卡片細節 */
         .gear-card {
-            background: #fff; border: 1px solid #eee;
-            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-            position: relative;
+            background: #fff; border: 1px solid var(--ef-border);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
         .gear-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
-            border-color: var(--ef-yellow);
+            transform: translateY(-5px) scale(1.02);
+            border-color: #000;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
         }
-        .gear-card::after {
-            content: "UNIT_RECOGNIZED"; position: absolute; top: 5px; right: 5px;
-            font-size: 8px; font-weight: 900; opacity: 0; transition: 0.3s;
-        }
-        .gear-card:hover::after { opacity: 0.2; }
+        .gear-card:hover .gear-img { transform: scale(1.1); }
 
-        /* 手機字體適中優化 */
-        @media (max-width: 768px) {
-            h1 { font-size: 1.5rem !important; }
+        /* 字體適中化：根據屏幕調整尺寸 */
+        @media (max-width: 640px) {
+            .ef-text-title { font-size: 1.25rem; }
+            .ef-text-base { font-size: 12px; }
             .gear-name { font-size: 13px !important; }
-            .stat-text { font-size: 11px !important; }
         }
     </style>
 </head>
-<body>
+<body class="p-5 md:p-10">
 
     <div id="loader">
-        <div class="w-16 h-1 w-full max-w-[200px] bg-gray-100 relative overflow-hidden">
-            <div id="loader-bar" class="absolute inset-0 bg-yellow-400 w-0 transition-all duration-500"></div>
-        </div>
-        <p class="mt-4 text-[10px] tracking-[0.5em] font-black animate-pulse uppercase text-zinc-400">Initializing_System...</p>
+        <div class="loader-line"><div id="loader-progress" class="loader-progress"></div></div>
+        <p class="mt-4 text-[9px] tracking-[0.4em] font-black uppercase text-zinc-400">Loading_Data_System</p>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 py-8 md:py-16">
-        <header class="relative mb-12 animate__animated animate__fadeInLeft">
-            <div class="flex items-start justify-between border-l-4 border-black pl-4">
-                <div>
-                    <h1 class="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-none">
-                        Endfield <span class="text-yellow-500 font-normal">Protocol</span>
-                    </h1>
-                    <p class="text-[10px] md:text-xs text-zinc-400 mt-2 tracking-[0.4em] font-bold">// DATABASE_QUERY_INTERFACE</p>
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end border-b-2 border-zinc-100 pb-6 animate__animated animate__fadeIn">
+            <div>
+                <div class="flex items-center space-x-2 mb-2">
+                    <div class="w-10 h-10 bg-black flex items-center justify-center">
+                        <span class="text-white font-black text-xl italic italic">E</span>
+                    </div>
+                    <h1 class="ef-text-title text-3xl font-black italic tracking-tighter uppercase">Endfield_Data</h1>
                 </div>
-                <img src="https://endfield.gryphline.com/favicon.ico" class="w-8 opacity-20">
+                <p class="text-[10px] text-zinc-400 tracking-[0.3em] font-bold uppercase leading-none">// Equipment_Recognition_Protocol</p>
             </div>
+            <button onclick="clearSelection()" class="mt-4 md:mt-0 bg-black text-white px-8 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-yellow-400 hover:text-black transition-all">
+                Reset_Database
+            </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12 animate__animated animate__fadeInUp animate__delay-1s">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12 animate__animated animate__fadeInUp">
             <div class="space-y-1">
-                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest pl-1">Base_Stat</span>
-                <select id="tag1"></select>
+                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Base_Stat</span>
+                <div class="ef-select-container" id="container1" onclick="toggleOptions(1)">
+                    <div id="selected1" class="p-3 text-sm font-bold truncate">-- SELECT --</div>
+                    <div id="options1" class="ef-options shadow-xl"></div>
+                </div>
             </div>
             <div class="space-y-1">
-                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest pl-1">Sub_Stat</span>
-                <select id="tag2"></select>
+                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Sub_Stat</span>
+                <div class="ef-select-container" id="container2" onclick="toggleOptions(2)">
+                    <div id="selected2" class="p-3 text-sm font-bold truncate">-- SELECT --</div>
+                    <div id="options2" class="ef-options shadow-xl"></div>
+                </div>
             </div>
             <div class="space-y-1">
-                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest pl-1">Skill_Logic</span>
-                <select id="tag3"></select>
-            </div>
-            <div class="flex items-end">
-                <button onclick="clearSelection()" class="ef-btn w-full py-3 text-xs font-black tracking-widest uppercase">
-                    Sync_All_Data
-                </button>
+                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Skill_Effect</span>
+                <div class="ef-select-container" id="container3" onclick="toggleOptions(3)">
+                    <div id="selected3" class="p-3 text-sm font-bold truncate">-- SELECT --</div>
+                    <div id="options3" class="ef-options shadow-xl"></div>
+                </div>
             </div>
         </div>
 
-        <div id="result" class="text-[10px] text-zinc-300 font-mono mb-6 uppercase tracking-widest text-right"></div>
+        <div id="result-status" class="text-[9px] text-zinc-300 font-mono mb-4 text-right uppercase"></div>
 
-        <div id="result-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-            </div>
-
-        <footer class="mt-24 py-12 border-t border-zinc-100 flex flex-col items-center space-y-4">
-            <div class="flex space-x-4 opacity-30">
-                <div class="w-2 h-2 bg-black rotate-45"></div>
-                <div class="w-2 h-2 bg-yellow-500 rotate-45"></div>
-                <div class="w-2 h-2 bg-black rotate-45"></div>
-            </div>
-            <p class="text-[9px] text-zinc-400 tracking-[0.2em] font-medium text-center px-4">
-                THIS IS A COMMUNITY-DRIVEN PROJECT. ALL ASSETS PROPERTY OF HYPERGRYPH © 2026.
-            </p>
-        </footer>
+        <div id="result-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8"></div>
     </div>
 
     <script src="script.js"></script>
