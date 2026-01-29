@@ -7,61 +7,61 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,900&family=Noto+Sans+TC:wght@300;400;700&display=swap');
 
         :root { --ef-yellow: #FFCF00; }
         body { 
             background-color: #fff; 
-            background-image: radial-gradient(#E8E8E8 1px, transparent 0); 
-            background-size: 32px 32px; 
+            background-image: radial-gradient(#E5E5E5 1px, transparent 0); 
+            background-size: 24px 24px; 
             font-family: 'Noto Sans TC', sans-serif;
-            color: #333;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Preloader - 縮小標誌比例 */
-        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1); }
+        /* Preloader - 回歸標準尺寸 */
+        #preloader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.5s ease-in-out; }
         #preloader.exit { transform: translateY(-100%); }
-        .loader-logo { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; font-size: 4rem; color: var(--ef-yellow); border-right: 4px solid var(--ef-yellow); white-space: nowrap; overflow: hidden; width: 0; animation: typing 1s steps(10) forwards; }
-        @keyframes typing { from { width: 0 } to { width: 300px } }
+        .loader-logo { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 900; font-size: 3rem; color: var(--ef-yellow); border-right: 3px solid var(--ef-yellow); white-space: nowrap; overflow: hidden; width: 0; animation: typing 0.8s steps(10) forwards; }
+        @keyframes typing { from { width: 0 } to { width: 240px } }
 
-        /* 斜切按鈕 - 官網標準比例 */
-        .ef-btn { background: #000; color: var(--ef-yellow); font-family: 'Barlow Condensed'; font-style: italic; font-weight: 800; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); transition: all 0.2s; cursor: pointer; border: none; }
+        /* 斜切按鈕 - 緊湊精緻版 */
+        .ef-btn { background: #000; color: var(--ef-yellow); font-family: 'Barlow Condensed'; font-style: italic; font-weight: 700; clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%); transition: all 0.2s; cursor: pointer; border: none; font-size: 1.1rem; }
         .ef-btn:hover { background: var(--ef-yellow); color: #000; }
 
-        .scan-effect::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.1), transparent); transform: translateY(-100%); }
-        .group:hover .scan-effect::after { animation: cardScan 1.2s linear infinite; }
+        .scan-effect::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(255, 207, 0, 0.08), transparent); transform: translateY(-100%); }
+        .group:hover .scan-effect::after { animation: cardScan 2s linear infinite; }
         @keyframes cardScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
     </style>
 </head>
-<body class="p-6 md:p-12 lg:p-20">
+<body class="p-6 md:p-10 lg:p-16">
     <div id="preloader"><div class="loader-logo">ENDFIELD</div></div>
 
-    <div id="main-content" class="max-w-[1440px] mx-auto opacity-0 transition-opacity duration-700">
-        <header class="mb-20 border-b-8 border-black pb-8 flex justify-between items-end">
+    <div id="main-content" class="max-w-[1280px] mx-auto opacity-0 transition-opacity duration-500">
+        <header class="mb-16 border-b-4 border-black pb-6 flex justify-between items-end">
             <div>
-                <p class="text-[10px] font-mono font-bold tracking-[0.4em] text-zinc-400 mb-2 uppercase">// DATA_SOURCE: ENDFIELD_ARC</p>
-                <h1 style="font-family:'Barlow Condensed'; font-style:italic" class="text-7xl md:text-9xl font-black leading-[0.85]">ENDFIELD</h1>
+                <p class="text-[9px] font-mono font-bold tracking-[0.5em] text-zinc-400 mb-1 uppercase">// PROTOCOL: ARCHIVE_SYNC</p>
+                <h1 style="font-family:'Barlow Condensed'; font-style:italic" class="text-6xl md:text-8xl font-black leading-tight">ENDFIELD</h1>
             </div>
-            <div class="text-right hidden lg:block">
-                <div class="w-32 h-4 bg-yellow-500 mb-3 ml-auto"></div>
-                <p class="font-mono text-xl font-bold italic tracking-tighter">OPERATIONAL_v1.0.4</p>
+            <div class="text-right hidden md:block">
+                <div class="w-24 h-3 bg-yellow-500 mb-2 ml-auto"></div>
+                <p class="font-mono text-sm font-bold italic tracking-tighter">OS_v1.0.4</p>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-16 bg-white border border-zinc-200 p-8 shadow-sm">
-            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="flex flex-col"><label class="text-[10px] font-bold text-zinc-400 mb-2 italic">01 // BASE</label><select id="tag1" class="border border-zinc-200 p-3 bg-zinc-50 font-bold text-sm outline-none focus:border-yellow-500"></select></div>
-                <div class="flex flex-col"><label class="text-[10px] font-bold text-zinc-400 mb-2 italic">02 // SUB</label><select id="tag2" class="border border-zinc-200 p-3 bg-zinc-50 font-bold text-sm outline-none focus:border-yellow-500"></select></div>
-                <div class="flex flex-col"><label class="text-[10px] font-bold text-zinc-400 mb-2 italic">03 // SKILL</label><select id="tag3" class="border border-zinc-200 p-3 bg-zinc-50 font-bold text-sm outline-none focus:border-yellow-500"></select></div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-12 bg-white border border-zinc-200 p-6 shadow-sm">
+            <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex flex-col"><label class="text-[9px] font-bold text-zinc-400 mb-1 italic">01 // BASE</label><select id="tag1" class="border border-zinc-200 p-2 bg-zinc-50 font-bold text-xs outline-none focus:border-yellow-500 transition-all"></select></div>
+                <div class="flex flex-col"><label class="text-[9px] font-bold text-zinc-400 mb-1 italic">02 // SUB</label><select id="tag2" class="border border-zinc-200 p-2 bg-zinc-50 font-bold text-xs outline-none focus:border-yellow-500 transition-all"></select></div>
+                <div class="flex flex-col"><label class="text-[9px] font-bold text-zinc-400 mb-1 italic">03 // SKILL</label><select id="tag3" class="border border-zinc-200 p-2 bg-zinc-50 font-bold text-xs outline-none focus:border-yellow-500 transition-all"></select></div>
             </div>
-            <button onclick="clearSelection()" class="ef-btn text-xl px-8 py-4 self-end">RESET_LOG</button>
+            <button onclick="clearSelection()" class="ef-btn px-6 py-3 self-end">RESET_LOG</button>
         </div>
 
-        <div id="result-count" class="font-mono text-[10px] text-zinc-400 mb-10 border-l-4 border-yellow-500 pl-4 uppercase tracking-[0.2em] font-bold">
-            // TERMINAL_READY...
+        <div id="result-count" class="font-mono text-[9px] text-zinc-400 mb-8 border-l-2 border-yellow-500 pl-3 uppercase tracking-widest font-bold">
+            // TERMINAL_STANDBY
         </div>
 
-        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+        <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
     </div>
     <script src="script.js"></script>
 </body>
